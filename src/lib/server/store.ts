@@ -73,6 +73,7 @@ function normalizeDb(raw: Partial<DatabaseSchema> | null | undefined): DatabaseS
 
 async function getCfEnv(): Promise<TraxCloudflareEnv | null> {
   try {
+    // getCloudflareContext throws if called outside of Cloudflare or during initial warmup
     const ctx = await getCloudflareContext({ async: true });
     return (ctx?.env as unknown as TraxCloudflareEnv) ?? null;
   } catch {
@@ -82,10 +83,11 @@ async function getCfEnv(): Promise<TraxCloudflareEnv | null> {
 
 function canUseLocalFs(): boolean {
   try {
-    if (typeof navigator !== "undefined" && (navigator.userAgent?.includes("Cloudflare") || Boolean((globalThis as unknown as Record<string, unknown>).WebSocketPair))) {
+    const g = globalThis as unknown as Record<string, unknown>;
+    if (Boolean(g.WebSocketPair) || Boolean(g.EdgeRuntime) || (typeof navigator !== "undefined" && navigator.userAgent?.includes("Cloudflare"))) {
       return false;
     }
-    return typeof process !== "undefined" && Boolean(process.versions?.node) && typeof fs.existsSync === "function" && typeof process.cwd === "function";
+    return typeof process !== "undefined" && Boolean(process.versions?.node) && typeof fs?.existsSync === "function" && typeof process?.cwd === "function";
   } catch {
     return false;
   }
