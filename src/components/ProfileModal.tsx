@@ -52,7 +52,7 @@ export function ProfileModal({ open, dict, onClose, onSelectField }: ProfileModa
 
   if (!open) return null;
 
-  const isEs = dict.brand !== "TraxPDF English"; // detect locale
+  const isEs = dict.nav.signIn !== "Sign in"; // detect locale
 
   const labels = [
     { key: "name" as const, label: isEs ? "Nombre completo" : "Full Name", placeholder: "Ej. Carlos Mendoza" },
