@@ -148,7 +148,7 @@ export async function writeDbAsync(db: DatabaseSchema): Promise<void> {
   if (canUseLocalFs()) {
     try {
       ensureLocalDirs();
-      const tmpFile = `${DB_FILE}.${crypto.randomBytes(4).toString("hex")}.tmp`;
+      const tmpFile = `${getLocalPaths().dbFile}.${crypto.randomBytes(4).toString("hex")}.tmp`;
       fs.writeFileSync(tmpFile, JSON.stringify(db, null, 2), "utf8");
       fs.renameSync(tmpFile, getLocalPaths().dbFile);
       return;
