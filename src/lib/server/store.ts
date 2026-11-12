@@ -42,9 +42,16 @@ interface TraxCloudflareEnv {
 }
 
 const KV_DB_KEY = "traxpdf:db:v1";
-const DATA_DIR = path.join(process.cwd(), ".data");
-const DB_FILE = path.join(DATA_DIR, "traxpdf-db.json");
-const CLOUD_DIR = path.join(DATA_DIR, "cloud");
+
+function getLocalPaths() {
+  const cwd = typeof process !== "undefined" && typeof process.cwd === "function" ? process.cwd() : "";
+  const dataDir = cwd ? path.join(cwd, ".data") : ".data";
+  return {
+    dataDir,
+    dbFile: path.join(dataDir, "traxpdf-db.json"),
+    cloudDir: path.join(dataDir, "cloud"),
+  };
+}
 
 const globalForStore = globalThis as typeof globalThis & {
   __traxMemoryDb?: DatabaseSchema;
@@ -85,11 +92,12 @@ function canUseLocalFs(): boolean {
 }
 
 function ensureLocalDirs() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  const { dataDir, cloudDir } = getLocalPaths();
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
   }
-  if (!fs.existsSync(CLOUD_DIR)) {
-    fs.mkdirSync(CLOUD_DIR, { recursive: true });
+  if (!fs.existsSync(cloudDir)) {
+    fs.mkdirSync(cloudDir, { recursive: true });
   }
 }
 
@@ -112,12 +120,12 @@ export async function readDbAsync(): Promise<DatabaseSchema> {
   if (canUseLocalFs()) {
     try {
       ensureLocalDirs();
-      if (!fs.existsSync(DB_FILE)) {
+      if (!fs.existsSync(getLocalPaths().dbFile)) {
         const initial = emptyDb();
-        fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2), "utf8");
+        fs.writeFileSync(getLocalPaths().dbFile, JSON.stringify(initial, null, 2), "utf8");
         return initial;
       }
-      const raw = fs.readFileSync(DB_FILE, "utf8");
+      const raw = fs.readFileSync(getLocalPaths().dbFile, "utf8");
       return normalizeDb(JSON.parse(raw) as Partial<DatabaseSchema>);
     } catch {
       // Fall through to memory store if FS is read-only (e.g. Workers without KV)
@@ -142,7 +150,7 @@ export async function writeDbAsync(db: DatabaseSchema): Promise<void> {
       ensureLocalDirs();
       const tmpFile = `${DB_FILE}.${crypto.randomBytes(4).toString("hex")}.tmp`;
       fs.writeFileSync(tmpFile, JSON.stringify(db, null, 2), "utf8");
-      fs.renameSync(tmpFile, DB_FILE);
+      fs.renameSync(tmpFile, getLocalPaths().dbFile);
       return;
     } catch {
       // Fall through to memory store
@@ -175,7 +183,7 @@ export async function saveCloudPdfBytesAsync(
       ensureLocalDirs();
       const safeUser = userId.replace(/[^a-zA-Z0-9_-]/g, "");
       const safeDoc = docId.replace(/[^a-zA-Z0-9_-]/g, "");
-      const dir = path.join(CLOUD_DIR, safeUser);
+      const dir = path.join(getLocalPaths().cloudDir, safeUser);
       if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(path.join(dir, `${safeDoc}.pdf`), bytes);
       return;
@@ -206,7 +214,7 @@ export async function readCloudPdfBytesAsync(
     try {
       const safeUser = userId.replace(/[^a-zA-Z0-9_-]/g, "");
       const safeDoc = docId.replace(/[^a-zA-Z0-9_-]/g, "");
-      const filePath = path.join(CLOUD_DIR, safeUser, `${safeDoc}.pdf`);
+      const filePath = path.join(getLocalPaths().cloudDir, safeUser, `${safeDoc}.pdf`);
       if (fs.existsSync(filePath)) {
         return new Uint8Array(fs.readFileSync(filePath));
       }
@@ -230,7 +238,7 @@ export async function deleteCloudPdfBytesAsync(userId: string, docId: string): P
     try {
       const safeUser = userId.replace(/[^a-zA-Z0-9_-]/g, "");
       const safeDoc = docId.replace(/[^a-zA-Z0-9_-]/g, "");
-      const filePath = path.join(CLOUD_DIR, safeUser, `${safeDoc}.pdf`);
+      const filePath = path.join(getLocalPaths().cloudDir, safeUser, `${safeDoc}.pdf`);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     } catch {
       // ignore
