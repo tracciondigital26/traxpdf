@@ -75,7 +75,10 @@ async function getCfEnv(): Promise<TraxCloudflareEnv | null> {
 
 function canUseLocalFs(): boolean {
   try {
-    return typeof process !== "undefined" && Boolean(process.versions?.node) && typeof fs.existsSync === "function";
+    if (typeof navigator !== "undefined" && (navigator.userAgent?.includes("Cloudflare") || Boolean((globalThis as unknown as Record<string, unknown>).WebSocketPair))) {
+      return false;
+    }
+    return typeof process !== "undefined" && Boolean(process.versions?.node) && typeof fs.existsSync === "function" && typeof process.cwd === "function";
   } catch {
     return false;
   }
