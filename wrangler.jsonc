@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "traxpdf",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-05-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "workers_dev": true,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "traxpdf"
+    }
+  ]
+  // Optional: Bind a Cloudflare KV namespace & R2 bucket for durable production persistence:
+  // "kv_namespaces": [
+  //   { "binding": "TRAX_KV", "id": "<YOUR_KV_NAMESPACE_ID>" }
+  // ],
+  // "r2_buckets": [
+  //   { "binding": "TRAX_R2", "bucket_name": "traxpdf-cloud-vault" }
+  // ]
+}

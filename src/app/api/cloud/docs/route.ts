@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { getOrCreateSession } from "@/lib/server/auth";
-import { readDb, saveCloudPdfBytes, writeDb } from "@/lib/server/store";
+import { readDbAsync, saveCloudPdfBytesAsync, writeDbAsync } from "@/lib/server/store";
 
 export async function GET() {
   const { session } = await getOrCreateSession();
@@ -15,7 +15,7 @@ export async function GET() {
     );
   }
 
-  const db = readDb();
+  const db = await readDbAsync();
   const docs = db.cloudDocs[session.userId] ?? [];
   return NextResponse.json({ docs });
 }
@@ -49,10 +49,10 @@ export async function POST(req: Request) {
     }
 
     const docId = `doc_${crypto.randomBytes(8).toString("hex")}`;
-    saveCloudPdfBytes(session.userId, docId, bytes);
+    await saveCloudPdfBytesAsync(session.userId, docId, bytes);
 
     const now = new Date().toISOString();
-    const db = readDb();
+    const db = await readDbAsync();
     const list = db.cloudDocs[session.userId] ?? [];
     const meta = {
       id: docId,
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     };
     list.unshift(meta);
     db.cloudDocs[session.userId] = list;
-    writeDb(db);
+    await writeDbAsync(db);
 
     return NextResponse.json({ ok: true, doc: meta });
   } catch {

@@ -42,3 +42,5 @@ next-env.d.ts
 
 # local app data store
 /.data/
+/.open-next/
+/.wrangler/

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { DAILY_LIMITS } from "@/lib/pricing";
 import { AUTH_COOKIES, getOrCreateSession } from "@/lib/server/auth";
-import { readDb, todayKey, writeDb } from "@/lib/server/store";
+import { readDbAsync, todayKey, writeDbAsync } from "@/lib/server/store";
 
 export async function POST() {
   const { session, setGuestCookie } = await getOrCreateSession();
-  const db = readDb();
+  const db = await readDbAsync();
   const day = todayKey();
 
   const attachGuestCookie = (res: NextResponse) => {
@@ -32,7 +32,7 @@ export async function POST() {
     // Unlimited plan
     if (limit === null) {
       user.dailyUsage[day] = usedToday + 1;
-      writeDb(db);
+      await writeDbAsync(db);
       return NextResponse.json({
         allowed: true,
         source: "unlimited",
@@ -45,7 +45,7 @@ export async function POST() {
     // Within daily free limit (3/day)
     if (usedToday < limit) {
       user.dailyUsage[day] = usedToday + 1;
-      writeDb(db);
+      await writeDbAsync(db);
       return NextResponse.json({
         allowed: true,
         source: "daily_free",
@@ -59,7 +59,7 @@ export async function POST() {
     if (user.credits >= 1) {
       user.credits -= 1;
       user.dailyUsage[day] = usedToday + 1;
-      writeDb(db);
+      await writeDbAsync(db);
       return NextResponse.json({
         allowed: true,
         source: "credit",
@@ -91,7 +91,7 @@ export async function POST() {
     if (guest) {
       guest.dailyUsage[day] = usedToday + 1;
       guest.updatedAt = new Date().toISOString();
-      writeDb(db);
+      await writeDbAsync(db);
     }
     return attachGuestCookie(
       NextResponse.json({

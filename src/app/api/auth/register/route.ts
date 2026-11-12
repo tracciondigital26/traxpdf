@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { AUTH_COOKIES, getOrCreateSession, hashPassword, signValue } from "@/lib/server/auth";
-import { readDb, writeDb } from "@/lib/server/store";
+import { readDbAsync, writeDbAsync } from "@/lib/server/store";
 
 export async function POST(req: Request) {
   try {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const db = readDb();
+    const db = await readDbAsync();
     if (db.usersByEmail[email]) {
       return NextResponse.json(
         { error: "An account with this email already exists" },
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     };
     db.usersByEmail[email] = userId;
-    writeDb(db);
+    await writeDbAsync(db);
 
     const token = signValue(userId);
     const { session } = await getOrCreateSession();

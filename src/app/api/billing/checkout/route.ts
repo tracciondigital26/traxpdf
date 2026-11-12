@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { CREDIT_PACKS, getPlanPriceCents, SUBSCRIPTION_PLANS } from "@/lib/pricing";
 import { getOrCreateSession } from "@/lib/server/auth";
-import { readDb, writeDb } from "@/lib/server/store";
+import { readDbAsync, writeDbAsync } from "@/lib/server/store";
 import type { BillingCycle } from "@/lib/types";
 
 type CheckoutBody =
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
   }
 
   // Instant Test / Demo Checkout when STRIPE_SECRET_KEY is not set
-  const db = readDb();
+  const db = await readDbAsync();
   const user = db.users[session.userId];
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
     user.billingCycle = body.cycle === "annual" ? "annual" : "monthly";
   }
 
-  writeDb(db);
+  await writeDbAsync(db);
   const { session: updatedSession } = await getOrCreateSession();
 
   return NextResponse.json({

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { AUTH_COOKIES, signValue, verifyPassword } from "@/lib/server/auth";
 import { DAILY_LIMITS } from "@/lib/pricing";
-import { readDb, todayKey } from "@/lib/server/store";
+import { readDbAsync, todayKey } from "@/lib/server/store";
 
 export async function POST(req: Request) {
   try {
@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     const email = (body.email ?? "").trim().toLowerCase();
     const password = body.password ?? "";
 
-    const db = readDb();
+    const db = await readDbAsync();
     const userId = db.usersByEmail[email];
     const user = userId ? db.users[userId] : undefined;
 

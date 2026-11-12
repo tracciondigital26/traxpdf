@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { DAILY_LIMITS } from "../pricing";
 import type { SessionInfo } from "../types";
-import { readDb, todayKey, writeDb } from "./store";
+import { readDbAsync, todayKey, writeDbAsync } from "./store";
 
 const SESSION_COOKIE = "trax_session";
 const GUEST_COOKIE = "trax_guest";
@@ -52,7 +52,7 @@ export async function getOrCreateSession(): Promise<{
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE)?.value;
   const userId = verifySignedValue(sessionToken);
-  const db = readDb();
+  const db = await readDbAsync();
   const day = todayKey();
   const stripeConfigured = Boolean(process.env.STRIPE_SECRET_KEY);
 
@@ -96,7 +96,7 @@ export async function getOrCreateSession(): Promise<{
       dailyUsage: {},
       updatedAt: new Date().toISOString(),
     };
-    writeDb(db);
+    await writeDbAsync(db);
   }
 
   const guest = db.guests[guestId];
