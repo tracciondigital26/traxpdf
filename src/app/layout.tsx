@@ -1,29 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "TraxPDF — Fill, Sign & Fix Any PDF in Seconds",
+  title: "TraxPDF — Rellena, Firma y Corrige PDFs",
   description:
-    "Global, fast and intuitive PDF studio: fill interactive forms, sign documents, and fix errors directly in your browser. 1 free/day without signup, 3/day free account, or $0.20/PDF.",
+    "Estudio PDF privado, rápido e intuitivo: llena formularios interactivos, firma documentos y corrige errores en segundos.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="es" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">{children}</body>
     </html>
   );
