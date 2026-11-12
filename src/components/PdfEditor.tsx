@@ -18,8 +18,10 @@ import {
   PenTool,
   Redo2,
   RotateCw,
+  Share2,
   Trash2,
   Type,
+  User,
   Undo2,
   X,
   ZoomIn,
@@ -35,6 +37,7 @@ import type {
   ToolMode,
 } from "@/lib/types";
 import { SignatureModal } from "./SignatureModal";
+import { ProfileModal } from "./ProfileModal";
 
 interface PdfEditorProps {
   sourceBytes: Uint8Array;
@@ -116,6 +119,15 @@ export function PdfEditor({
   const [flatten, setFlatten] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [savingCloud, setSavingCloud] = useState(false);
+  const [deletedPages, setDeletedPages] = useState<number[]>([]);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [canShare, setCanShare] = useState(false);
+
+  useEffect(() => {
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      setCanShare(true);
+    }
+  }, []);
 
   const [dragBox, setDragBox] = useState<{
     startX: number;
@@ -640,6 +652,44 @@ export function PdfEditor({
     setAnnotations((prev) => prev.map((a) => (a.id === selectedId ? { ...a, ...patch } : a)));
   };
 
+  const handleDeleteCurrentPage = () => {
+    const activePageCount = numPages - deletedPages.length;
+    if (activePageCount <= 1) {
+      onNotify("No puedes eliminar la única página del documento.", "error");
+      return;
+    }
+    if (!window.confirm(`¿Eliminar la página ${currentPage + 1}? Esta página se excluirá al descargar.`)) {
+      return;
+    }
+    const nextDeleted = [...deletedPages, currentPage];
+    setDeletedPages(nextDeleted);
+    if (currentPage > 0) {
+      setCurrentPage((p) => Math.max(0, p - 1));
+    }
+    onNotify(`Página ${currentPage + 1} marcada como eliminada.`, "success");
+  };
+
+  const handleSharePdf = async () => {
+    try {
+      const outBytes = await buildOutputPdf();
+      const blob = new Blob([new Uint8Array(outBytes)], { type: "application/pdf" });
+      const base = fileName.replace(/\.pdf$/i, "");
+      const file = new File([blob], `${base}-traxpdf.pdf`, { type: "application/pdf" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: `${base}-traxpdf.pdf`,
+          files: [file],
+        });
+      } else {
+        onNotify("Tu dispositivo no soporta compartir este archivo directamente.", "error");
+      }
+    } catch (err: unknown) {
+      if ((err as { name?: string })?.name !== "AbortError") {
+        onNotify("No se pudo compartir el archivo.", "error");
+      }
+    }
+  };
+
   const buildOutputPdf = async () => {
     const resolvedFields = formFields.map((f) => ({
       ...f,
@@ -650,6 +700,7 @@ export function PdfEditor({
       formFields: resolvedFields,
       annotations,
       pageRotations,
+      deletedPages,
       flatten,
     });
   };
@@ -769,6 +820,16 @@ export function PdfEditor({
 
         {/* Core Editing Tools */}
         <div className="flex items-center flex-wrap gap-1 rounded-xl bg-slate-900 p-1 border border-slate-800">
+          <button
+            type="button"
+            onClick={() => setProfileModalOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800/80 transition"
+            title="Mis Datos Frecuentes"
+          >
+            <User className="h-3.5 w-3.5 text-indigo-400" />
+            <span className="hidden sm:inline">Mis Datos</span>
+          </button>
+          <div className="h-4 w-px bg-slate-800 mx-0.5 hidden sm:block" />
           {toolButtons.map((btn) => (
             <button
               key={btn.id}
@@ -818,6 +879,19 @@ export function PdfEditor({
               {savingCloud ? t.savingCloud : t.saveCloudBtn}
             </span>
           </button>
+
+          {canShare && (
+            <button
+              type="button"
+              onClick={handleSharePdf}
+              disabled={exporting}
+              title="Compartir PDF a WhatsApp o Correo"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition"
+            >
+              <Share2 className="h-3.5 w-3.5 text-indigo-400" />
+              <span className="hidden sm:inline">Compartir</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -884,6 +958,15 @@ export function PdfEditor({
           >
             <RotateCw className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">{t.rotate}</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleDeleteCurrentPage}
+            className="inline-flex items-center gap-1 rounded px-2 py-1 text-red-400 hover:bg-red-500/10 hover:text-red-300"
+            title="Eliminar esta página"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Eliminar pág.</span>
           </button>
           <div className="h-4 w-px bg-slate-800 mx-1" />
           <button
@@ -1431,6 +1514,30 @@ export function PdfEditor({
         onSelectSignature={(url) => {
           setPendingSignatureUrl(url);
           setTool("sign");
+        }}
+      />
+
+      {/* Mis Datos Modal */}
+      <ProfileModal
+        open={profileModalOpen}
+        dict={dict}
+        onClose={() => setProfileModalOpen(false)}
+        onSelectField={(text) => {
+          const newAnn: PdfAnnotation = {
+            id: "ann_" + Math.random().toString(36).slice(2, 9),
+            type: "text",
+            pageIndex: currentPage,
+            x: 0.25,
+            y: 0.35,
+            width: 0.3,
+            height: 0.04,
+            text,
+            fontSize: 13,
+            color: "#111827",
+          };
+          setAnnotations((prev) => [...prev, newAnn]);
+          setSelectedId(newAnn.id);
+          onNotify("Dato colocado en la página.", "success");
         }}
       />
     </div>
