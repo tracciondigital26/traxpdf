@@ -99,9 +99,10 @@ export async function exportModifiedPdf(params: {
   formFields: DetectedFormField[];
   annotations: PdfAnnotation[];
   pageRotations: Record<number, number>; // extra clockwise degrees per pageIndex
+  deletedPages?: number[];
   flatten: boolean;
 }): Promise<Uint8Array> {
-  const { sourceBytes, formFields, annotations, pageRotations, flatten } = params;
+  const { sourceBytes, formFields, annotations, pageRotations, deletedPages = [], flatten } = params;
   const pdfDoc = await PDFDocument.load(sourceBytes, { ignoreEncryption: true });
 
   // 1. Apply AcroForm values
@@ -325,6 +326,15 @@ export async function exportModifiedPdf(params: {
       } catch {
         // Ignore invalid image data
       }
+    }
+  }
+
+  // Remove marked pages in reverse order so indices do not shift
+  const sortedDeletes = [...new Set(deletedPages)].sort((a, b) => b - a);
+  const totalPages = pdfDoc.getPageCount();
+  for (const pageIdx of sortedDeletes) {
+    if (totalPages > 1 && pageIdx >= 0 && pageIdx < pdfDoc.getPageCount()) {
+      pdfDoc.removePage(pageIdx);
     }
   }
 
