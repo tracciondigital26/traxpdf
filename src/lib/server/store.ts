@@ -16,6 +16,8 @@ export interface StoredUser {
   createdAt: string;
   promoApplied?: string | null;
   proExpiresAt?: string | null;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
 }
 
 export interface StoredGuest {

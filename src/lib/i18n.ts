@@ -166,6 +166,8 @@ export const dictionaries = {
       promoActiveBadge: "Active promo",
       promoExpires: "Expires",
       promoLifetime: "Lifetime access",
+      manageBilling: "Manage Subscription & Invoices",
+      openingPortal: "Opening Stripe portal...",
     },
     paywall: {
       title: "Daily limit reached",
@@ -372,6 +374,8 @@ export const dictionaries = {
       promoActiveBadge: "Promoción activa",
       promoExpires: "Vence el",
       promoLifetime: "Acceso de por vida",
+      manageBilling: "Gestionar Suscripción y Facturas",
+      openingPortal: "Abriendo portal de Stripe...",
     },
     paywall: {
       title: "Límite diario alcanzado",

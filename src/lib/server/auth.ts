@@ -88,6 +88,7 @@ export async function getOrCreateSession(): Promise<{
         cloudEnabled: user.plan === "pro_cloud",
         cloudDocCount: docs.length,
         stripeConfigured,
+        hasStripeSubscription: Boolean(user.stripeSubscriptionId),
         promoApplied: user.promoApplied ?? null,
         proExpiresAt: user.proExpiresAt ?? null,
       },

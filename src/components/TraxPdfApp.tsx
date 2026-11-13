@@ -155,6 +155,35 @@ export function TraxPdfApp() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    const checkoutStatus = url.searchParams.get("checkout");
+    if (!checkoutStatus) return;
+
+    url.searchParams.delete("checkout");
+    window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+
+    const timer = setTimeout(() => {
+      if (checkoutStatus === "success") {
+        notify(
+          locale === "es"
+            ? "¡Pago procesado con éxito! Tu cuenta y saldo han sido actualizados."
+            : "Payment successful! Your account and balance have been updated.",
+          "success",
+        );
+        void refreshSession();
+      } else if (checkoutStatus === "cancelled") {
+        notify(
+          locale === "es" ? "El proceso de pago fue cancelado." : "Checkout was cancelled.",
+          "error",
+        );
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [locale, notify, refreshSession]);
+
+  useEffect(() => {
     if (theme === "dark") {
       document.documentElement.classList.add("dark");
     } else {

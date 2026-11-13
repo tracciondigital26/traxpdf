@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Cloud, Coins, Crown, Gift, Loader2, Sparkles, X } from "lucide-react";
+import { Check, Cloud, Coins, CreditCard, Crown, Gift, Loader2, Sparkles, X } from "lucide-react";
 import type { Dictionary } from "@/lib/i18n";
 import { CREDIT_PACKS, SUBSCRIPTION_PLANS } from "@/lib/pricing";
 import type { BillingCycle, SessionInfo } from "@/lib/types";
@@ -31,8 +31,27 @@ export function PricingModal({
   const [promoCodeInput, setPromoCodeInput] = useState("");
   const [promoBusy, setPromoBusy] = useState(false);
   const [promoFeedback, setPromoFeedback] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [portalBusy, setPortalBusy] = useState(false);
 
   if (!open) return null;
+
+  const handleOpenPortal = async () => {
+    setPortalBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const data = (await res.json()) as { portalUrl?: string; error?: string };
+      if (!res.ok || !data.portalUrl) {
+        setMessage(data.error || "No se pudo abrir el portal de Stripe.");
+        return;
+      }
+      window.location.href = data.portalUrl;
+    } catch {
+      setMessage("Error de red");
+    } finally {
+      setPortalBusy(false);
+    }
+  };
 
   const runCheckout = async (
     payload:
@@ -144,6 +163,26 @@ export function PricingModal({
           {message && (
             <div className="rounded-xl border border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 px-4 py-2.5 text-xs text-rose-700 dark:text-rose-200">
               {message}
+            </div>
+          )}
+
+          {session?.hasStripeSubscription && session?.stripeConfigured && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50/70 dark:bg-indigo-950/30 text-xs">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                <span className="font-medium text-slate-800 dark:text-slate-200">
+                  {session.plan === "pro_cloud" ? "Plan Pro+ Nube activo" : "Plan Pro Ilimitado activo"}
+                </span>
+              </div>
+              <button
+                type="button"
+                disabled={portalBusy}
+                onClick={handleOpenPortal}
+                className="inline-flex items-center gap-1.5 font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                {portalBusy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                {portalBusy ? t.openingPortal : t.manageBilling}
+              </button>
             </div>
           )}
 
