@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   AlertCircle,
   Bug,
@@ -11,6 +11,7 @@ import {
   Lightbulb,
   Loader2,
   Minimize2,
+  RotateCcw,
   Send,
 } from "lucide-react";
 import type { FeedbackCategory, SessionInfo } from "@/lib/types";
@@ -19,7 +20,10 @@ interface FeedbackWidgetProps {
   session: SessionInfo | null;
 }
 
+const STORAGE_KEY = "trax_feedback_widget_pos_v2";
+
 export function FeedbackWidget({ session }: FeedbackWidgetProps) {
+  const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [category, setCategory] = useState<FeedbackCategory>("bug");
   const [message, setMessage] = useState("");
@@ -27,63 +31,168 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
   const [loading, setLoading] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Position state (relative to viewport)
-  const [pos, setPos] = useState<{ x: number; y: number }>(() => {
-    if (typeof window === "undefined") return { x: 20, y: 20 };
-    // Default: bottom-right corner
-    return {
-      x: Math.max(16, window.innerWidth - 240),
-      y: Math.max(16, window.innerHeight - 80),
-    };
-  });
+  // Viewport-relative coordinates (pixels from top-left)
+  const [pos, setPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const isDraggingRef = useRef(false);
-  const dragOffsetRef = useRef({ x: 0, y: 0 });
-  const hasMovedRef = useRef(false);
+  const startDragRef = useRef<{ clientX: number; clientY: number; posX: number; posY: number }>({
+    clientX: 0,
+    clientY: 0,
+    posX: 0,
+    posY: 0,
+  });
+  const movedDistRef = useRef(0);
+  const expandedRef = useRef(expanded);
+  expandedRef.current = expanded;
 
-  // Keep in bounds on resize
+  // Calculate safe dimensions
+  const getWidgetDimensions = useCallback((isExp: boolean) => {
+    if (typeof window === "undefined") return { width: 170, height: 44 };
+    const width = isExp ? Math.min(360, window.innerWidth - 24) : 170;
+    const height = isExp ? 460 : 44;
+    return { width, height };
+  }, []);
+
+  // Clamp coordinates inside visible viewport with margin
+  const clampPos = useCallback(
+    (x: number, y: number, isExp: boolean) => {
+      if (typeof window === "undefined") return { x, y };
+      const margin = 12;
+      const { width, height } = getWidgetDimensions(isExp);
+      const maxX = Math.max(margin, window.innerWidth - width - margin);
+      const maxY = Math.max(margin, window.innerHeight - height - margin);
+
+      return {
+        x: Math.max(margin, Math.min(maxX, x)),
+        y: Math.max(margin, Math.min(maxY, y)),
+      };
+    },
+    [getWidgetDimensions],
+  );
+
+  // Initialize position on mount (client-only)
   useEffect(() => {
-    const handleResize = () => {
-      setPos((prev) => ({
-        x: Math.min(prev.x, Math.max(16, window.innerWidth - (expanded ? 340 : 220))),
-        y: Math.min(prev.y, Math.max(16, window.innerHeight - (expanded ? 420 : 60))),
-      }));
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [expanded]);
+    setMounted(true);
+    let initialX = window.innerWidth - 180;
+    let initialY = window.innerHeight - 60;
 
-  // Pointer drag listeners
-  const handlePointerDown = (e: React.PointerEvent) => {
-    isDraggingRef.current = true;
-    hasMovedRef.current = false;
-    dragOffsetRef.current = {
-      x: e.clientX - pos.x,
-      y: e.clientY - pos.y,
-    };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDraggingRef.current) return;
-    hasMovedRef.current = true;
-    const maxX = window.innerWidth - (expanded ? 340 : 200);
-    const maxY = window.innerHeight - (expanded ? 440 : 50);
-
-    const newX = Math.max(12, Math.min(maxX, e.clientX - dragOffsetRef.current.x));
-    const newY = Math.max(12, Math.min(maxY, e.clientY - dragOffsetRef.current.y));
-
-    setPos({ x: newX, y: newY });
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    isDraggingRef.current = false;
     try {
-      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as { x?: number; y?: number };
+        if (typeof parsed.x === "number" && typeof parsed.y === "number") {
+          initialX = parsed.x;
+          initialY = parsed.y;
+        }
+      }
     } catch {
       // ignore
     }
+
+    setPos(clampPos(initialX, initialY, false));
+  }, [clampPos]);
+
+  // Handle window resize or expand/collapse adjustments
+  useEffect(() => {
+    if (!mounted) return;
+    setPos((prev) => clampPos(prev.x, prev.y, expanded));
+
+    const handleResize = () => {
+      setPos((prev) => clampPos(prev.x, prev.y, expandedRef.current));
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [mounted, expanded, clampPos]);
+
+  // Reset to default bottom-right
+  const handleResetPosition = () => {
+    if (typeof window === "undefined") return;
+    const { width, height } = getWidgetDimensions(expanded);
+    const newPos = {
+      x: window.innerWidth - width - 16,
+      y: window.innerHeight - height - 16,
+    };
+    setPos(newPos);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newPos));
+    } catch {
+      // ignore
+    }
+  };
+
+  // Robust window-level pointer drag
+  const handleStartDrag = (e: React.PointerEvent) => {
+    // Only primary button
+    if (e.button !== 0) return;
+
+    // Don't drag if clicking buttons or inputs inside
+    const target = e.target as HTMLElement;
+    if (
+      target.closest("button") ||
+      target.closest("input") ||
+      target.closest("textarea") ||
+      target.closest("a")
+    ) {
+      return;
+    }
+
+    e.preventDefault();
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    movedDistRef.current = 0;
+
+    startDragRef.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      posX: pos.x,
+      posY: pos.y,
+    };
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      if (!isDraggingRef.current) return;
+      const dx = moveEvent.clientX - startDragRef.current.clientX;
+      const dy = moveEvent.clientY - startDragRef.current.clientY;
+      movedDistRef.current = Math.hypot(dx, dy);
+
+      const nextX = startDragRef.current.posX + dx;
+      const nextY = startDragRef.current.posY + dy;
+
+      const clamped = clampPos(nextX, nextY, expandedRef.current);
+      setPos(clamped);
+    };
+
+    const handlePointerUp = () => {
+      if (!isDraggingRef.current) return;
+      isDraggingRef.current = false;
+      setIsDragging(false);
+
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+
+      // Save position to localStorage
+      setPos((current) => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+        } catch {
+          // ignore
+        }
+        return current;
+      });
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+  };
+
+  const handlePillClick = () => {
+    // If it was just a drag, don't toggle
+    if (movedDistRef.current > 6) return;
+    setExpanded(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,7 +212,7 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
         body: JSON.stringify({
           category,
           message: message.trim(),
-          email: session?.authenticated ? session.email : (email.trim() || undefined),
+          email: session?.authenticated ? session.email : email.trim() || undefined,
           url: typeof window !== "undefined" ? window.location.href : undefined,
         }),
       });
@@ -119,13 +228,25 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
       setTimeout(() => {
         setFeedbackSent(false);
         setExpanded(false);
-      }, 2200);
+      }, 2000);
     } catch {
       setErrorMsg("Error de conexión al enviar el reporte.");
     } finally {
       setLoading(false);
     }
   };
+
+  // If not mounted yet (SSR), render safely fixed at bottom-right
+  if (!mounted) {
+    return (
+      <div className="fixed bottom-4 right-4 z-50">
+        <div className="flex items-center gap-2 bg-rose-600 text-white px-3.5 py-2 rounded-full shadow-lg text-xs font-bold">
+          <Bug className="w-4 h-4 text-white" />
+          <span>Reportar Fallo</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -134,41 +255,34 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
         left: `${pos.x}px`,
         top: `${pos.y}px`,
         zIndex: 9999,
+        touchAction: "none",
       }}
-      className="select-none transition-shadow"
+      className={`select-none ${isDragging ? "cursor-grabbing" : ""}`}
     >
       {!expanded ? (
         /* Collapsed Floating Pill */
         <div
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onClick={() => {
-            if (!hasMovedRef.current) {
-              setExpanded(true);
-            }
-          }}
-          className="group flex items-center gap-2 bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white px-3.5 py-2 rounded-full shadow-xl shadow-rose-950/20 cursor-grab active:cursor-grabbing border border-white/25 backdrop-blur-md transition-transform duration-150 hover:scale-105 active:scale-95"
-          title="Arrastra para mover o haz clic para reportar un fallo"
+          onPointerDown={handleStartDrag}
+          onClick={handlePillClick}
+          className="group flex items-center gap-2 bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white px-3.5 py-2 rounded-full shadow-xl shadow-rose-950/25 cursor-grab active:cursor-grabbing border border-white/30 backdrop-blur-md transition-transform duration-100 hover:scale-105 active:scale-95"
+          title="Arrastra para mover a cualquier parte o haz clic para reportar un problema"
         >
-          <GripVertical className="w-3.5 h-3.5 opacity-60 group-hover:opacity-100 shrink-0" />
-          <Bug className="w-4 h-4 text-white animate-pulse shrink-0" />
-          <span className="text-xs font-bold tracking-tight whitespace-nowrap">
+          <GripVertical className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 shrink-0 pointer-events-none" />
+          <Bug className="w-4 h-4 text-white animate-pulse shrink-0 pointer-events-none" />
+          <span className="text-xs font-bold tracking-tight whitespace-nowrap pointer-events-none">
             Reportar Fallo
           </span>
         </div>
       ) : (
         /* Expanded Feedback Card */
-        <div className="w-[330px] sm:w-[360px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-900 dark:text-slate-100 animate-in fade-in zoom-in-95 duration-150">
+        <div className="w-[330px] sm:w-[360px] max-w-[calc(100vw-24px)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col text-slate-900 dark:text-slate-100 animate-in fade-in zoom-in-95 duration-150">
           {/* Draggable Header */}
           <div
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            className="flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-800 cursor-grab active:cursor-grabbing"
-            title="Arrastra para mover el formulario"
+            onPointerDown={handleStartDrag}
+            className="flex items-center justify-between px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-800 cursor-grab active:cursor-grabbing"
+            title="Arrastra para mover esta ventana"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pointer-events-none">
               <GripVertical className="w-4 h-4 text-slate-400" />
               <div className="flex items-center gap-1.5 font-bold text-xs text-slate-800 dark:text-slate-200">
                 <Bug className="w-3.5 h-3.5 text-rose-500" />
@@ -176,19 +290,30 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setExpanded(false)}
-              className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition"
-              title="Minimizar (contraer)"
-              aria-label="Contraer"
-            >
-              <Minimize2 className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleResetPosition}
+                className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition"
+                title="Restablecer posición a la esquina inferior derecha"
+                aria-label="Restablecer posición"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setExpanded(false)}
+                className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition"
+                title="Minimizar (contraer)"
+                aria-label="Contraer"
+              >
+                <Minimize2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
 
-          {/* Body */}
-          <div className="p-4 space-y-3.5 text-xs">
+          {/* Form Content */}
+          <div className="p-3.5 space-y-3 text-xs">
             {feedbackSent ? (
               <div className="py-6 text-center space-y-2">
                 <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto animate-bounce" />
@@ -196,7 +321,7 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
                   ¡Reporte recibido!
                 </p>
                 <p className="text-slate-500 dark:text-slate-400 text-xs">
-                  Gracias por ayudarnos a perfeccionar TraxPDF. Lo revisaremos de inmediato.
+                  Gracias por ayudarnos a mejorar TraxPDF. Lo revisaremos enseguida.
                 </p>
               </div>
             ) : (
@@ -217,7 +342,7 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
                     <button
                       type="button"
                       onClick={() => setCategory("bug")}
-                      className={`flex items-center gap-1.5 p-2 rounded-xl border text-[11px] font-medium transition ${
+                      className={`flex items-center gap-1.5 p-1.5 rounded-xl border text-[11px] font-medium transition ${
                         category === "bug"
                           ? "bg-rose-500/10 border-rose-500/40 text-rose-600 dark:text-rose-400 font-bold"
                           : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
@@ -230,7 +355,7 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
                     <button
                       type="button"
                       onClick={() => setCategory("pdf_issue")}
-                      className={`flex items-center gap-1.5 p-2 rounded-xl border text-[11px] font-medium transition ${
+                      className={`flex items-center gap-1.5 p-1.5 rounded-xl border text-[11px] font-medium transition ${
                         category === "pdf_issue"
                           ? "bg-indigo-500/10 border-indigo-500/40 text-indigo-600 dark:text-indigo-400 font-bold"
                           : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
@@ -243,7 +368,7 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
                     <button
                       type="button"
                       onClick={() => setCategory("suggestion")}
-                      className={`flex items-center gap-1.5 p-2 rounded-xl border text-[11px] font-medium transition ${
+                      className={`flex items-center gap-1.5 p-1.5 rounded-xl border text-[11px] font-medium transition ${
                         category === "suggestion"
                           ? "bg-amber-500/10 border-amber-500/40 text-amber-600 dark:text-amber-400 font-bold"
                           : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
@@ -256,7 +381,7 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
                     <button
                       type="button"
                       onClick={() => setCategory("other")}
-                      className={`flex items-center gap-1.5 p-2 rounded-xl border text-[11px] font-medium transition ${
+                      className={`flex items-center gap-1.5 p-1.5 rounded-xl border text-[11px] font-medium transition ${
                         category === "other"
                           ? "bg-purple-500/10 border-purple-500/40 text-purple-600 dark:text-purple-400 font-bold"
                           : "border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
@@ -271,13 +396,13 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
                 {/* Description textarea */}
                 <div className="space-y-1">
                   <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-                    Descripción del fallo o qué hacías:
+                    Descripción del fallo o problema:
                   </label>
                   <textarea
                     rows={3}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Ej: Al intentar firmar la página 2 se congeló..."
+                    placeholder="Ej: Al firmar la página 2 se congeló o el botón no respondió..."
                     className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 p-2.5 text-xs text-slate-900 dark:text-slate-100 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 resize-none"
                     required
                   />
@@ -299,7 +424,7 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
                   </div>
                 )}
 
-                {/* Submit button */}
+                {/* Footer action buttons */}
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[10px] text-slate-400">
                     Arrastra la barra para mover
