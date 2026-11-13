@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerEnv } from "@/lib/server/env";
 import { readDbAsync, writeDbAsync } from "@/lib/server/store";
 import { verifyStripeWebhookSignature } from "@/lib/server/stripe";
-import type { BillingCycle, PlanTier } from "@/lib/types";
+import type { BillingCycle, PlanTier, PurchaseRecord } from "@/lib/types";
 
 interface StripeEvent {
   id: string;
@@ -41,6 +41,9 @@ export async function POST(req: Request) {
         customer?: string;
         subscription?: string;
         mode?: string;
+        created?: number;
+        amount_total?: number;
+        currency?: string;
         metadata?: {
           userId?: string;
           kind?: string;
@@ -56,13 +59,24 @@ export async function POST(req: Request) {
       if (!userId || !db.users[userId]) break;
 
       const user = db.users[userId];
+      if (!user.purchases) user.purchases = [];
+
+      // Deduplicate if already handled
+      if (sessionObj.id && user.purchases.some((p) => p.id === sessionObj.id)) {
+        break;
+      }
+
       if (sessionObj.customer && typeof sessionObj.customer === "string") {
         user.stripeCustomerId = sessionObj.customer;
       }
 
+      let addedCredits = 0;
+      let description = "Compra TraxPDF";
+
       if (meta.kind === "credits") {
-        const addedCredits = Number(meta.credits) || 0;
+        addedCredits = Number(meta.credits) || 0;
         user.credits += addedCredits;
+        description = `Paquete de ${addedCredits} Créditos PDF`;
         dbChanged = true;
       } else if (
         meta.kind === "subscription" &&
@@ -74,6 +88,22 @@ export async function POST(req: Request) {
         if (sessionObj.subscription && typeof sessionObj.subscription === "string") {
           user.stripeSubscriptionId = sessionObj.subscription;
         }
+        description = `Suscripción ${user.plan === "pro_cloud" ? "Pro+ Nube" : "Pro Ilimitado"} (${user.billingCycle === "annual" ? "Anual" : "Mensual"})`;
+        dbChanged = true;
+      }
+
+      if (sessionObj.id) {
+        const purchase: PurchaseRecord = {
+          id: sessionObj.id,
+          date: new Date((sessionObj.created || Math.floor(Date.now() / 1000)) * 1000).toISOString(),
+          description,
+          amount: (sessionObj.amount_total ?? 0) / 100,
+          currency: (sessionObj.currency ?? "usd").toUpperCase(),
+          kind: (meta.kind as "credits" | "subscription") || "credits",
+          credits: addedCredits || undefined,
+          status: "completed",
+        };
+        user.purchases = [purchase, ...user.purchases];
         dbChanged = true;
       }
       break;

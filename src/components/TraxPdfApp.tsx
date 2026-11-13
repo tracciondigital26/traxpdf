@@ -23,6 +23,7 @@ import {
 import { detectLocale, dictionaries } from "@/lib/i18n";
 import { generateSamplePdf } from "@/lib/pdf/samplePdf";
 import type { Locale, SessionInfo } from "@/lib/types";
+import { AccountModal } from "./AccountModal";
 import { AuthModal } from "./AuthModal";
 import { CloudVaultModal } from "./CloudVaultModal";
 import { PaywallModal } from "./PaywallModal";
@@ -111,6 +112,7 @@ export function TraxPdfApp() {
   const [pricingOpen, setPricingOpen] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [cloudOpen, setCloudOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
 
@@ -158,20 +160,37 @@ export function TraxPdfApp() {
     if (typeof window === "undefined") return;
     const url = new URL(window.location.href);
     const checkoutStatus = url.searchParams.get("checkout");
-    if (!checkoutStatus) return;
+    const sessionId = url.searchParams.get("session_id");
+    if (!checkoutStatus && !sessionId) return;
 
     url.searchParams.delete("checkout");
+    url.searchParams.delete("session_id");
     window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
 
     const timer = setTimeout(() => {
-      if (checkoutStatus === "success") {
-        notify(
-          locale === "es"
-            ? "¡Pago procesado con éxito! Tu cuenta y saldo han sido actualizados."
-            : "Payment successful! Your account and balance have been updated.",
-          "success",
-        );
-        void refreshSession();
+      if (checkoutStatus === "success" || sessionId) {
+        const runConfirm = async () => {
+          if (sessionId) {
+            try {
+              await fetch("/api/billing/confirm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ sessionId }),
+              });
+            } catch {
+              // ignore
+            }
+          }
+          await refreshSession();
+          setAccountOpen(true);
+          notify(
+            locale === "es"
+              ? "¡Pago procesado con éxito! Se han añadido tus créditos a tu cuenta."
+              : "Payment successful! Your credits have been added to your account.",
+            "success",
+          );
+        };
+        void runConfirm();
       } else if (checkoutStatus === "cancelled") {
         notify(
           locale === "es" ? "El proceso de pago fue cancelado." : "Checkout was cancelled.",
@@ -338,10 +357,29 @@ export function TraxPdfApp() {
 
           {session?.authenticated ? (
             <div className="flex items-center gap-2">
-              <span className="hidden md:inline-flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5">
+              {session.credits > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition shadow-sm"
+                  title="Ver saldo de créditos e historial"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>{session.credits} {dict.nav.creditsLabel}</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setAccountOpen(true)}
+                className="inline-flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-2.5 py-1.5 hover:bg-slate-200/80 dark:hover:bg-slate-800 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
+                title={dict.nav.account}
+              >
                 <User className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />
-                {session.name}
-              </span>
+                <span className="hidden md:inline font-medium">{session.name}</span>
+                <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+                  {dict.nav.account}
+                </span>
+              </button>
               <button
                 type="button"
                 onClick={handleLogout}
@@ -606,6 +644,15 @@ export function TraxPdfApp() {
           setPdfName(name);
           setCloudOpen(false);
         }}
+      />
+
+      <AccountModal
+        open={accountOpen}
+        onClose={() => setAccountOpen(false)}
+        session={session}
+        dict={dict}
+        onOpenPricing={() => setPricingOpen(true)}
+        onSessionRefresh={refreshSession}
       />
     </div>
   );

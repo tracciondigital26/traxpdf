@@ -3,8 +3,16 @@ import { AUTH_COOKIES, getOrCreateSession } from "@/lib/server/auth";
 
 export async function GET() {
   try {
-    const { session, setGuestCookie } = await getOrCreateSession();
+    const { session, setGuestCookie, setSessionCookie } = await getOrCreateSession();
     const res = NextResponse.json(session);
+    if (setSessionCookie) {
+      res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, setSessionCookie, {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    }
     if (setGuestCookie) {
       res.cookies.set(AUTH_COOKIES.GUEST_COOKIE, setGuestCookie, {
         httpOnly: true,
@@ -30,6 +38,7 @@ export async function GET() {
       cloudEnabled: false,
       cloudDocCount: 0,
       stripeConfigured: false,
+      purchases: [],
     });
   }
 }

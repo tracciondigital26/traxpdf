@@ -4,6 +4,17 @@ export type BillingCycle = "monthly" | "annual";
 
 export type Locale = "en" | "es";
 
+export interface PurchaseRecord {
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  currency: string;
+  kind: "credits" | "subscription" | "promo";
+  credits?: number;
+  status: "completed" | "active" | "cancelled";
+}
+
 export interface SessionInfo {
   authenticated: boolean;
   userId: string;
@@ -21,6 +32,7 @@ export interface SessionInfo {
   hasStripeSubscription?: boolean;
   promoApplied?: string | null;
   proExpiresAt?: string | null; // ISO date if limited promo, null if lifetime/paid
+  purchases?: PurchaseRecord[];
 }
 
 export interface CloudDocMeta {

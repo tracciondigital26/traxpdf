@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { AUTH_COOKIES, signValue, verifyPassword } from "@/lib/server/auth";
+import { AUTH_COOKIES, createSessionToken, verifyPassword } from "@/lib/server/auth";
 import { DAILY_LIMITS } from "@/lib/pricing";
 import { readDbAsync, todayKey } from "@/lib/server/store";
+import { isStripeConfigured } from "@/lib/server/env";
 
 export async function POST(req: Request) {
   try {
@@ -21,6 +22,7 @@ export async function POST(req: Request) {
     const usedToday = user.dailyUsage[day] ?? 0;
     const dailyLimit = DAILY_LIMITS[user.plan];
     const remainingToday = dailyLimit === null ? null : Math.max(0, dailyLimit - usedToday);
+    const stripeConfigured = await isStripeConfigured();
 
     const res = NextResponse.json({
       ok: true,
@@ -37,11 +39,15 @@ export async function POST(req: Request) {
         credits: user.credits,
         cloudEnabled: user.plan === "pro_cloud",
         cloudDocCount: (db.cloudDocs[user.id] ?? []).length,
-        stripeConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
+        stripeConfigured,
+        hasStripeSubscription: Boolean(user.stripeSubscriptionId),
+        promoApplied: user.promoApplied ?? null,
+        proExpiresAt: user.proExpiresAt ?? null,
+        purchases: user.purchases || [],
       },
     });
 
-    res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, signValue(user.id), {
+    res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, createSessionToken(user), {
       httpOnly: true,
       sameSite: "lax",
       path: "/",

@@ -22,7 +22,7 @@ export async function createStripeCheckoutSession(
   const isSub = params.kind === "subscription";
 
   body.set("mode", isSub ? "subscription" : "payment");
-  body.set("success_url", `${params.origin}/?checkout=success`);
+  body.set("success_url", `${params.origin}/?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
   body.set("cancel_url", `${params.origin}/?checkout=cancelled`);
 
   if (params.stripeCustomerId) {

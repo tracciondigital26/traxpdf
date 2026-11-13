@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import type { BillingCycle, CloudDocMeta, PlanTier } from "../types";
+import type { BillingCycle, CloudDocMeta, PlanTier, PurchaseRecord } from "../types";
 
 export interface StoredUser {
   id: string;
@@ -18,6 +18,7 @@ export interface StoredUser {
   proExpiresAt?: string | null;
   stripeCustomerId?: string | null;
   stripeSubscriptionId?: string | null;
+  purchases?: PurchaseRecord[];
 }
 
 export interface StoredGuest {

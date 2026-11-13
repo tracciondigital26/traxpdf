@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
-import { AUTH_COOKIES, getOrCreateSession, hashPassword, signValue } from "@/lib/server/auth";
-import { readDbAsync, writeDbAsync } from "@/lib/server/store";
+import { AUTH_COOKIES, createSessionToken, getOrCreateSession, hashPassword } from "@/lib/server/auth";
+import { readDbAsync, StoredUser, writeDbAsync } from "@/lib/server/store";
 import { evaluatePromoCode } from "@/lib/promo";
+import type { PurchaseRecord } from "@/lib/types";
 
 export async function POST(req: Request) {
   try {
@@ -51,7 +52,20 @@ export async function POST(req: Request) {
     }
 
     const userId = `usr_${crypto.randomBytes(10).toString("hex")}`;
-    db.users[userId] = {
+    const initialPurchases: PurchaseRecord[] = [];
+    if (promoApplied) {
+      initialPurchases.push({
+        id: `promo_${Date.now()}`,
+        date: new Date().toISOString(),
+        description: `Código promocional: ${promoApplied}`,
+        amount: 0,
+        currency: "USD",
+        kind: "promo",
+        status: "active",
+      });
+    }
+
+    const newUser: StoredUser = {
       id: userId,
       email,
       name,
@@ -63,11 +77,13 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
       promoApplied,
       proExpiresAt,
+      purchases: initialPurchases,
     };
+    db.users[userId] = newUser;
     db.usersByEmail[email] = userId;
     await writeDbAsync(db);
 
-    const token = signValue(userId);
+    const token = createSessionToken(newUser);
     const { session } = await getOrCreateSession();
 
     const res = NextResponse.json({
@@ -89,6 +105,7 @@ export async function POST(req: Request) {
         cloudEnabled: false,
         promoApplied,
         proExpiresAt,
+        purchases: initialPurchases,
       },
     });
 

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getOrCreateSession } from "@/lib/server/auth";
+import { AUTH_COOKIES, createSessionToken, getOrCreateSession } from "@/lib/server/auth";
 import { readDbAsync, writeDbAsync } from "@/lib/server/store";
 import { evaluatePromoCode } from "@/lib/promo";
+import type { PurchaseRecord } from "@/lib/types";
 
 export async function POST(req: Request) {
   try {
@@ -34,15 +35,36 @@ export async function POST(req: Request) {
     user.plan = "pro";
     user.promoApplied = evaluation.promo.code;
     user.proExpiresAt = evaluation.proExpiresAt ?? null;
+
+    const promoRecord: PurchaseRecord = {
+      id: `promo_${evaluation.promo.code}_${Date.now()}`,
+      date: new Date().toISOString(),
+      description: `Código promocional: ${evaluation.promo.title}`,
+      amount: 0,
+      currency: "USD",
+      kind: "promo",
+      status: "active",
+    };
+    user.purchases = [promoRecord, ...(user.purchases || [])];
+
     await writeDbAsync(db);
 
     const { session: updatedSession } = await getOrCreateSession();
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       ok: true,
       message: `¡Código ${evaluation.promo.code} aplicado con éxito! Has activado ${evaluation.promo.title}.`,
       session: updatedSession,
     });
+
+    res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, createSessionToken(user), {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+    });
+
+    return res;
   } catch {
     return NextResponse.json({ error: "Error al canjear el código promocional." }, { status: 500 });
   }
