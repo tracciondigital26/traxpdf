@@ -169,12 +169,12 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
-      <div className="w-full max-w-xl rounded-2xl bg-white text-slate-900 shadow-2xl border border-slate-200 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h3 className="text-lg font-semibold text-slate-900">{t.title}</h3>
+      <div className="w-full max-w-xl rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{t.title}</h3>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
@@ -182,14 +182,14 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
 
         <div className="p-6 space-y-5">
           {/* Tabs */}
-          <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-100 p-1">
+          <div className="grid grid-cols-3 gap-2 rounded-xl bg-slate-100 dark:bg-slate-800 p-1">
             <button
               type="button"
               onClick={() => setTab("draw")}
               className={`flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition ${
                 tab === "draw"
-                  ? "bg-white text-indigo-600 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <PenTool className="h-4 w-4" />
@@ -200,8 +200,8 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
               onClick={() => setTab("type")}
               className={`flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition ${
                 tab === "type"
-                  ? "bg-white text-indigo-600 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <Type className="h-4 w-4" />
@@ -212,8 +212,8 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
               onClick={() => setTab("upload")}
               className={`flex items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition ${
                 tab === "upload"
-                  ? "bg-white text-indigo-600 shadow-sm"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <Upload className="h-4 w-4" />
@@ -225,14 +225,14 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
           {tab !== "upload" && (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-slate-500">{t.inkColor}:</span>
+                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">{t.inkColor}:</span>
                 {INK_COLORS.map((color) => (
                   <button
                     key={color}
                     type="button"
                     onClick={() => setInkColor(color)}
                     className={`h-6 w-6 rounded-full border-2 transition ${
-                      inkColor === color ? "border-indigo-500 scale-110" : "border-slate-200"
+                      inkColor === color ? "border-indigo-500 scale-110" : "border-slate-300 dark:border-slate-700"
                     }`}
                     style={{ backgroundColor: color }}
                   />
@@ -242,7 +242,7 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
                 <button
                   type="button"
                   onClick={clearCanvas}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-900"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 >
                   <Eraser className="h-3.5 w-3.5" />
                   {t.clear}
@@ -253,7 +253,7 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
 
           {/* Tab Body */}
           {tab === "draw" && (
-            <div className="relative rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 overflow-hidden">
+            <div className="relative rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 overflow-hidden">
               <canvas
                 ref={canvasRef}
                 width={560}
@@ -264,7 +264,7 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
                 onPointerCancel={handlePointerUp}
                 className="w-full h-44 touch-none cursor-crosshair block"
               />
-              <div className="pointer-events-none absolute inset-x-8 bottom-6 border-b border-slate-300/80" />
+              <div className="pointer-events-none absolute inset-x-8 bottom-6 border-b border-slate-300 dark:border-slate-700" />
             </div>
           )}
 
@@ -275,9 +275,9 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
                 value={typedName}
                 onChange={(e) => setTypedName(e.target.value)}
                 placeholder={t.typePlaceholder}
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm text-slate-900 dark:text-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
               />
-              <div className="flex h-36 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-4">
+              <div className="flex h-36 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-4">
                 <span
                   className="text-4xl italic select-none"
                   style={{ fontFamily: "'Georgia', 'Times New Roman', serif", color: inkColor }}
@@ -289,14 +289,14 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
           )}
 
           {tab === "upload" && (
-            <label className="flex flex-col items-center justify-center h-44 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 cursor-pointer hover:border-indigo-400 transition p-4">
+            <label className="flex flex-col items-center justify-center h-44 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 cursor-pointer hover:border-indigo-400 transition p-4">
               {uploadedUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={uploadedUrl} alt="Signature preview" className="max-h-36 object-contain" />
               ) : (
                 <div className="text-center space-y-2">
                   <Upload className="h-8 w-8 mx-auto text-slate-400" />
-                  <p className="text-sm text-slate-600">{t.uploadPrompt}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">{t.uploadPrompt}</p>
                 </div>
               )}
               <input
@@ -311,14 +311,14 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
           {/* Saved Signatures */}
           {savedSignatures.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">
                 {t.savedTitle}
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {savedSignatures.map((sig, i) => (
                   <div
                     key={i}
-                    className="group relative rounded-lg border border-slate-200 bg-slate-50 p-2 hover:border-indigo-400 transition cursor-pointer"
+                    className="group relative rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 p-2 hover:border-indigo-400 transition cursor-pointer"
                     onClick={() => {
                       onSelectSignature(sig);
                       onClose();
@@ -342,18 +342,18 @@ export function SignatureModal({ open, dict, onClose, onSelectSignature }: Signa
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={() => handleConfirm(false)}
-              className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
               {t.useSignature}
             </button>
             <button
               type="button"
               onClick={() => handleConfirm(true)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 shadow-sm"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 shadow-sm transition"
             >
               <Check className="h-4 w-4" />
               {t.saveAndUse}

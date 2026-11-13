@@ -68,18 +68,18 @@ export function CloudVaultModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl rounded-2xl bg-slate-950 text-white border border-slate-800 shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+      <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-950 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden transition-colors">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <Cloud className="h-5 w-5 text-emerald-400" />
+            <Cloud className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
             <div>
               <h3 className="text-lg font-bold">{t.title}</h3>
-              <p className="text-xs text-slate-400">{t.subtitle}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t.subtitle}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
@@ -87,12 +87,12 @@ export function CloudVaultModal({
 
         <div className="p-6">
           {!session?.cloudEnabled ? (
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-8 text-center space-y-4">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/70 p-8 text-center space-y-4">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
                 <Lock className="h-6 w-6" />
               </div>
-              <h4 className="text-base font-semibold">{t.lockedTitle}</h4>
-              <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+              <h4 className="text-base font-semibold text-slate-900 dark:text-white">{t.lockedTitle}</h4>
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
                 {t.lockedDesc}
               </p>
               <button
@@ -101,7 +101,7 @@ export function CloudVaultModal({
                   onClose();
                   onOpenPricing();
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500"
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 transition"
               >
                 <Cloud className="h-4 w-4" />
                 {t.upgradeBtn}
@@ -109,10 +109,10 @@ export function CloudVaultModal({
             </div>
           ) : loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-emerald-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-emerald-500 dark:text-emerald-400" />
             </div>
           ) : docs.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-800 p-10 text-center text-sm text-slate-400">
+            <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-10 text-center text-sm text-slate-500 dark:text-slate-400">
               {t.empty}
             </div>
           ) : (
@@ -120,13 +120,13 @@ export function CloudVaultModal({
               {docs.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 px-4 py-3"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <FileText className="h-5 w-5 text-emerald-400 shrink-0" />
+                    <FileText className="h-5 w-5 text-emerald-500 dark:text-emerald-400 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{doc.title}</p>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{doc.title}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {doc.pageCount} {t.pages} · {(doc.sizeBytes / 1024).toFixed(1)} KB
                       </p>
                     </div>
@@ -135,7 +135,7 @@ export function CloudVaultModal({
                     <button
                       type="button"
                       onClick={() => handleOpenInEditor(doc)}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-500 transition"
                     >
                       <FolderOpen className="h-3.5 w-3.5" />
                       {t.openInEditor}
@@ -143,7 +143,7 @@ export function CloudVaultModal({
                     <a
                       href={`/api/cloud/docs/${doc.id}`}
                       download={doc.fileName}
-                      className="rounded-lg border border-slate-700 p-1.5 text-slate-300 hover:bg-slate-800 hover:text-white"
+                      className="rounded-lg border border-slate-300 dark:border-slate-700 p-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                       title={t.download}
                     >
                       <Download className="h-4 w-4" />
@@ -151,7 +151,7 @@ export function CloudVaultModal({
                     <button
                       type="button"
                       onClick={() => handleDelete(doc.id)}
-                      className="rounded-lg border border-slate-700 p-1.5 text-rose-400 hover:bg-rose-950/50"
+                      className="rounded-lg border border-slate-300 dark:border-slate-700 p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50"
                       title={t.delete}
                     >
                       <Trash2 className="h-4 w-4" />

@@ -18,6 +18,8 @@ export interface SessionInfo {
   cloudEnabled: boolean;
   cloudDocCount: number;
   stripeConfigured: boolean;
+  promoApplied?: string | null;
+  proExpiresAt?: string | null; // ISO date if limited promo, null if lifetime/paid
 }
 
 export interface CloudDocMeta {

@@ -800,35 +800,35 @@ export function PdfEditor({
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] bg-slate-900 text-slate-100">
+    <div className="flex flex-col h-[calc(100vh-64px)] bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors">
       {/* Studio Toolbar */}
-      <div className="border-b border-slate-800 bg-slate-950/90 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <div className="border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/90 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={onBackHome}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {t.backHome}
           </button>
-          <span className="hidden xl:inline text-xs font-medium text-slate-400 max-w-44 truncate">
+          <span className="hidden xl:inline text-xs font-medium text-slate-500 dark:text-slate-400 max-w-44 truncate">
             {fileName}
           </span>
         </div>
 
         {/* Core Editing Tools */}
-        <div className="flex items-center flex-wrap gap-1 rounded-xl bg-slate-900 p-1 border border-slate-800">
+        <div className="flex items-center flex-wrap gap-1 rounded-xl bg-slate-100 dark:bg-slate-900 p-1 border border-slate-200 dark:border-slate-800">
           <button
             type="button"
             onClick={() => setProfileModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-800/80 transition"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200/80 dark:hover:bg-slate-800/80 transition"
             title="Mis Datos Frecuentes"
           >
-            <User className="h-3.5 w-3.5 text-indigo-400" />
+            <User className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
             <span className="hidden sm:inline">Mis Datos</span>
           </button>
-          <div className="h-4 w-px bg-slate-800 mx-0.5 hidden sm:block" />
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-0.5 hidden sm:block" />
           {toolButtons.map((btn) => (
             <button
               key={btn.id}
@@ -837,7 +837,7 @@ export function PdfEditor({
               className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
                 tool === btn.id
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               {btn.icon}
@@ -848,12 +848,12 @@ export function PdfEditor({
 
         {/* Export & Cloud Actions */}
         <div className="flex items-center gap-2">
-          <label className="hidden lg:inline-flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer select-none mr-1">
+          <label className="hidden lg:inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 cursor-pointer select-none mr-1">
             <input
               type="checkbox"
               checked={flatten}
               onChange={(e) => setFlatten(e.target.checked)}
-              className="rounded border-slate-700 bg-slate-900 text-indigo-500"
+              className="rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-indigo-600"
             />
             {t.flattenLabel}
           </label>
@@ -865,14 +865,14 @@ export function PdfEditor({
             title={session?.cloudEnabled ? t.saveCloudBtn : t.cloudLockedTooltip}
             className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
               session?.cloudEnabled
-                ? "border border-emerald-500/40 bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25"
-                : "border border-slate-700 bg-slate-900 text-slate-300 hover:border-emerald-500/50"
+                ? "border border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25"
+                : "border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-emerald-500/50"
             }`}
           >
             {savingCloud ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Cloud className="h-3.5 w-3.5 text-emerald-400" />
+              <Cloud className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
             )}
             <span className="hidden sm:inline">
               {savingCloud ? t.savingCloud : t.saveCloudBtn}
@@ -885,9 +885,9 @@ export function PdfEditor({
               onClick={handleSharePdf}
               disabled={exporting}
               title="Compartir PDF a WhatsApp o Correo"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-800 transition"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
             >
-              <Share2 className="h-3.5 w-3.5 text-indigo-400" />
+              <Share2 className="h-3.5 w-3.5 text-indigo-500 dark:text-indigo-400" />
               <span className="hidden sm:inline">Compartir</span>
             </button>
           )}
@@ -909,27 +909,27 @@ export function PdfEditor({
       </div>
 
       {/* Sub-bar: Guided Hint + Page/Zoom/History Controls */}
-      <div className="border-b border-slate-800/80 bg-slate-900/95 px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-2 text-indigo-300">
-          <span className="inline-block h-2 w-2 rounded-full bg-indigo-400" />
+      <div className="border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/95 dark:bg-slate-900/95 px-4 py-1.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
+          <span className="inline-block h-2 w-2 rounded-full bg-indigo-500 dark:bg-indigo-400" />
           <span>{t.hints[tool]}</span>
           {formFields.length > 0 ? (
-            <span className="ml-2 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[11px] text-emerald-300">
+            <span className="ml-2 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[11px] text-emerald-700 dark:text-emerald-300">
               {formFields.length} {t.formsDetected}
             </span>
           ) : (
-            <span className="ml-2 rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[11px] text-amber-300">
+            <span className="ml-2 rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[11px] text-amber-700 dark:text-amber-300">
               {t.flatPdfBadge}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-2 text-slate-300">
+        <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <button
             type="button"
             onClick={handleUndo}
             disabled={historyPast.length === 0}
-            className="p-1.5 rounded hover:bg-slate-800 disabled:opacity-35"
+            className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-35"
             title={t.undo}
           >
             <Undo2 className="h-3.5 w-3.5" />
@@ -938,12 +938,12 @@ export function PdfEditor({
             type="button"
             onClick={handleRedo}
             disabled={historyFuture.length === 0}
-            className="p-1.5 rounded hover:bg-slate-800 disabled:opacity-35"
+            className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-35"
             title={t.redo}
           >
             <Redo2 className="h-3.5 w-3.5" />
           </button>
-          <div className="h-4 w-px bg-slate-800 mx-1" />
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-1" />
           <button
             type="button"
             onClick={() =>
@@ -952,7 +952,7 @@ export function PdfEditor({
                 [currentPage]: ((prev[currentPage] || 0) + 90) % 360,
               }))
             }
-            className="inline-flex items-center gap-1 rounded px-2 py-1 hover:bg-slate-800"
+            className="inline-flex items-center gap-1 rounded px-2 py-1 hover:bg-slate-200 dark:hover:bg-slate-800"
             title={t.rotate}
           >
             <RotateCw className="h-3.5 w-3.5" />
@@ -963,8 +963,8 @@ export function PdfEditor({
             onClick={handleToggleDeleteCurrentPage}
             className={`inline-flex items-center gap-1 rounded px-2 py-1 transition ${
               isCurrentPageDeleted
-                ? "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
-                : "text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                ? "bg-amber-500/20 text-amber-600 dark:text-amber-300 hover:bg-amber-500/30"
+                : "text-red-500 dark:text-red-400 hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-300"
             }`}
             title={isCurrentPageDeleted ? "Restaurar esta página" : "Eliminar esta página"}
           >
@@ -980,11 +980,11 @@ export function PdfEditor({
               </>
             )}
           </button>
-          <div className="h-4 w-px bg-slate-800 mx-1" />
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-1" />
           <button
             type="button"
             onClick={() => setZoom((z) => Math.max(0.6, +(z - 0.15).toFixed(2)))}
-            className="p-1 rounded hover:bg-slate-800"
+            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
           >
             <ZoomOut className="h-3.5 w-3.5" />
           </button>
@@ -992,16 +992,16 @@ export function PdfEditor({
           <button
             type="button"
             onClick={() => setZoom((z) => Math.min(2.2, +(z + 0.15).toFixed(2)))}
-            className="p-1 rounded hover:bg-slate-800"
+            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800"
           >
             <ZoomIn className="h-3.5 w-3.5" />
           </button>
-          <div className="h-4 w-px bg-slate-800 mx-1" />
+          <div className="h-4 w-px bg-slate-300 dark:bg-slate-800 mx-1" />
           <button
             type="button"
             disabled={currentPage <= 0}
             onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-            className="p-1 rounded hover:bg-slate-800 disabled:opacity-35"
+            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-35"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -1012,7 +1012,7 @@ export function PdfEditor({
             type="button"
             disabled={currentPage >= numPages - 1}
             onClick={() => setCurrentPage((p) => Math.min(numPages - 1, p + 1))}
-            className="p-1 rounded hover:bg-slate-800 disabled:opacity-35"
+            className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-35"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -1022,7 +1022,7 @@ export function PdfEditor({
       {/* Main 3-Column Studio */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Left Page Strip */}
-        <aside className="hidden md:flex w-28 flex-col gap-2 border-r border-slate-800 bg-slate-950/60 p-3 overflow-y-auto">
+        <aside className="hidden md:flex w-28 flex-col gap-2 border-r border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-3 overflow-y-auto">
           {Array.from({ length: numPages }).map((_, idx) => {
             const isDel = deletedPages.includes(idx);
             return (
@@ -1032,10 +1032,10 @@ export function PdfEditor({
                 onClick={() => setCurrentPage(idx)}
                 className={`relative rounded-xl border p-2.5 text-center transition ${
                   isDel
-                    ? "border-red-900/60 bg-red-950/30 text-red-400 opacity-60"
+                    ? "border-red-300 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 opacity-60"
                     : currentPage === idx
-                      ? "border-indigo-500 bg-indigo-500/15 text-white"
-                      : "border-slate-800 bg-slate-900/70 text-slate-400 hover:border-slate-700"
+                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-white"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700"
                 }`}
               >
                 {isDel && (
@@ -1047,14 +1047,14 @@ export function PdfEditor({
                   className={`mx-auto mb-1.5 h-14 w-10 rounded border bg-white/95 flex items-center justify-center text-[10px] font-bold ${
                     isDel
                       ? "border-red-500 text-red-500 line-through"
-                      : "border-slate-700 text-slate-600"
+                      : "border-slate-400 dark:border-slate-700 text-slate-700 dark:text-slate-600"
                   }`}
                 >
                   {idx + 1}
                 </div>
                 <span
                   className={`text-[11px] font-medium ${
-                    isDel ? "line-through text-red-400" : ""
+                    isDel ? "line-through text-red-500 dark:text-red-400" : ""
                   }`}
                 >
                   {t.page} {idx + 1}
@@ -1065,7 +1065,7 @@ export function PdfEditor({
         </aside>
 
         {/* Center PDF Workspace */}
-        <main className="flex-1 overflow-auto bg-slate-800/70 p-6 flex justify-center items-start">
+        <main className="flex-1 overflow-auto bg-slate-200/80 dark:bg-slate-800/70 p-6 flex justify-center items-start">
           <div
             className="relative shadow-2xl bg-white select-none"
             style={{ width: pageSize.width, height: pageSize.height }}
@@ -1416,13 +1416,13 @@ export function PdfEditor({
         </main>
 
         {/* Right Properties Inspector */}
-        <aside className="hidden lg:flex w-72 flex-col border-l border-slate-800 bg-slate-950/80 p-4 space-y-5 overflow-y-auto">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <aside className="hidden lg:flex w-72 flex-col border-l border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/80 p-4 space-y-5 overflow-y-auto">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             {t.inspector.title}
           </h3>
 
           {!selectedAnnotation ? (
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-400 leading-relaxed">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 p-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
               {t.inspector.noSelection}
             </div>
           ) : (
@@ -1432,7 +1432,7 @@ export function PdfEditor({
                 selectedAnnotation.type === "date") && (
                 <>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-300">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
                       {t.inspector.textContent}
                     </label>
                     <textarea
@@ -1440,12 +1440,12 @@ export function PdfEditor({
                       value={selectedAnnotation.text || ""}
                       placeholder={t.inspector.placeholderText}
                       onChange={(e) => updateSelected({ text: e.target.value })}
-                      className="w-full rounded-xl border border-slate-800 bg-slate-900 px-3 py-2 text-xs text-white outline-none focus:border-indigo-500"
+                      className="w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-xs text-slate-900 dark:text-white outline-none focus:border-indigo-500"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-300 flex justify-between">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300 flex justify-between">
                       <span>{t.inspector.fontSize}</span>
                       <span>{selectedAnnotation.fontSize || 12}pt</span>
                     </label>
@@ -1461,7 +1461,7 @@ export function PdfEditor({
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="text-xs font-medium text-slate-300">
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
                         {t.inspector.fontFamily}
                       </label>
                       <select
@@ -1469,7 +1469,7 @@ export function PdfEditor({
                         onChange={(e) =>
                           updateSelected({ fontFamily: e.target.value as AnnotationFont })
                         }
-                        className="w-full rounded-lg border border-slate-800 bg-slate-900 px-2 py-1.5 text-xs text-white"
+                        className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 px-2 py-1.5 text-xs text-slate-900 dark:text-white"
                       >
                         <option value="Helvetica">Sans (Helvetica)</option>
                         <option value="Times">Serif (Times)</option>
@@ -1477,14 +1477,14 @@ export function PdfEditor({
                       </select>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-medium text-slate-300">Style</label>
+                      <label className="text-xs font-medium text-slate-700 dark:text-slate-300">Style</label>
                       <button
                         type="button"
                         onClick={() => updateSelected({ bold: !selectedAnnotation.bold })}
                         className={`w-full rounded-lg border px-2 py-1.5 text-xs font-bold ${
                           selectedAnnotation.bold
                             ? "border-indigo-500 bg-indigo-600 text-white"
-                            : "border-slate-800 bg-slate-900 text-slate-300"
+                            : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-300"
                         }`}
                       >
                         {t.inspector.bold}
@@ -1493,7 +1493,7 @@ export function PdfEditor({
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-slate-300">
+                    <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
                       {t.inspector.textColor}
                     </label>
                     <div className="flex gap-2">
@@ -1505,7 +1505,7 @@ export function PdfEditor({
                           className={`h-6 w-6 rounded-full border-2 ${
                             selectedAnnotation.color === c
                               ? "border-indigo-400 scale-110"
-                              : "border-slate-700"
+                              : "border-slate-300 dark:border-slate-700"
                           }`}
                           style={{ backgroundColor: c }}
                         />
@@ -1517,7 +1517,7 @@ export function PdfEditor({
 
               {selectedAnnotation.type === "correct" && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-slate-300">
+                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
                     {t.inspector.bgColor}
                   </label>
                   <div className="flex gap-2">
@@ -1529,7 +1529,7 @@ export function PdfEditor({
                         className={`h-6 w-6 rounded-full border-2 ${
                           (selectedAnnotation.bgColor || "#FFFFFF") === c
                             ? "border-indigo-400 scale-110"
-                            : "border-slate-600"
+                            : "border-slate-300 dark:border-slate-600"
                         }`}
                         style={{ backgroundColor: c }}
                       />

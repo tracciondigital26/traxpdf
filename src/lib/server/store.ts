@@ -14,6 +14,8 @@ export interface StoredUser {
   credits: number;
   dailyUsage: Record<string, number>;
   createdAt: string;
+  promoApplied?: string | null;
+  proExpiresAt?: string | null;
 }
 
 export interface StoredGuest {

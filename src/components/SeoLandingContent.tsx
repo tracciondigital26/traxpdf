@@ -46,7 +46,7 @@ export function SeoLandingContent({
       desc: isEs
         ? "Arrastra tu documento a la zona de carga o selecciónalo desde tu dispositivo. Se abre al instante sin esperas de servidor."
         : "Drag and drop your file or select it from your device. It opens instantly right in your browser.",
-      icon: <Upload className="h-6 w-6 text-indigo-400" />,
+      icon: <Upload className="h-6 w-6 text-indigo-500 dark:text-indigo-400" />,
     },
     {
       num: "02",
@@ -54,7 +54,7 @@ export function SeoLandingContent({
       desc: isEs
         ? "Usa 'Editar Texto PDF' para corregir erratas existentes, 'Agregar Texto' para rellenar líneas vacías, o dibuja tu firma con trazo natural."
         : "Use 'Edit PDF Text' to fix typos, 'Add Text' to fill blank fields, or draw your signature cleanly in seconds.",
-      icon: <Edit3 className="h-6 w-6 text-emerald-400" />,
+      icon: <Edit3 className="h-6 w-6 text-emerald-500 dark:text-emerald-400" />,
     },
     {
       num: "03",
@@ -62,7 +62,7 @@ export function SeoLandingContent({
       desc: isEs
         ? "Haz clic en 'Exportar y Descargar PDF' para obtener tu archivo listo, con opción de aplanar para bloquear futuras modificaciones."
         : "Click 'Export & Download PDF' to get your finished document, with optional flattening to prevent further tampering.",
-      icon: <CheckCircle2 className="h-6 w-6 text-violet-400" />,
+      icon: <CheckCircle2 className="h-6 w-6 text-violet-500 dark:text-violet-400" />,
     },
   ];
 
@@ -72,7 +72,7 @@ export function SeoLandingContent({
       desc: isEs
         ? "Detecta automáticamente palabras y párrafos en el PDF para que puedas reescribirlos, cambiar números o corregir nombres sin convertir a Word."
         : "Automatically detects words and paragraphs so you can rewrite them, change numbers or fix names without converting to Word.",
-      icon: <FileText className="h-5 w-5 text-indigo-400" />,
+      icon: <FileText className="h-5 w-5 text-indigo-500 dark:text-indigo-400" />,
       tag: isEs ? "Exclusivo" : "Featured",
     },
     {
@@ -80,7 +80,7 @@ export function SeoLandingContent({
       desc: isEs
         ? "¿Tu PDF fue escaneado o impreso sin campos? Haz clic en cualquier espacio para escribir, poner palomitas (✓) o taches (✗) como si fuera un formulario real."
         : "Was your PDF scanned or flat without fillable fields? Click anywhere to type text, checkmarks (✓) or crosses (✗) with pixel precision.",
-      icon: <MousePointerClick className="h-5 w-5 text-emerald-400" />,
+      icon: <MousePointerClick className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />,
       tag: isEs ? "Cero complicaciones" : "Smart Fill",
     },
     {
@@ -88,7 +88,7 @@ export function SeoLandingContent({
       desc: isEs
         ? "Dibuja tu firma con el mouse o dedo, escribe tu nombre con tipografía caligráfica profesional o sube una imagen de tu firma autógrafa."
         : "Draw your signature by hand, type your name for an elegant handwritten font, or upload a PNG image of your actual signature.",
-      icon: <FileSignature className="h-5 w-5 text-amber-400" />,
+      icon: <FileSignature className="h-5 w-5 text-amber-500 dark:text-amber-400" />,
       tag: isEs ? "Reutilizable" : "Saved Signatures",
     },
     {
@@ -96,7 +96,7 @@ export function SeoLandingContent({
       desc: isEs
         ? "Tapa errores viejos con corrector blanco idéntico al fondo, o censura datos confidenciales (números de cuenta, contraseñas, RFCs) con cajas negras permanentes."
         : "Cover typos with seamless whiteout patches or permanently blackout confidential details (bank accounts, passwords, IDs).",
-      icon: <Eraser className="h-5 w-5 text-rose-400" />,
+      icon: <Eraser className="h-5 w-5 text-rose-500 dark:text-rose-400" />,
       tag: isEs ? "Seguridad" : "Privacy Tool",
     },
     {
@@ -104,7 +104,7 @@ export function SeoLandingContent({
       desc: isEs
         ? "Rota páginas volteadas 90° con 1 clic y elimina páginas sobrantes o anexos innecesarios para reducir el peso y entregar un documento impecable."
         : "Rotate sideways pages 90° with 1 click and eliminate unnecessary pages or annexes before exporting.",
-      icon: <Trash2 className="h-5 w-5 text-orange-400" />,
+      icon: <Trash2 className="h-5 w-5 text-orange-500 dark:text-orange-400" />,
       tag: isEs ? "Edición total" : "Page Manager",
     },
     {
@@ -112,7 +112,7 @@ export function SeoLandingContent({
       desc: isEs
         ? "Guarda tu nombre, RFC, teléfono y dirección en tu navegador para estamparlos en cualquier formulario o solicitud con un solo clic."
         : "Save your name, tax ID, phone and address locally in your browser to stamp them onto any form with a single click.",
-      icon: <Zap className="h-5 w-5 text-cyan-400" />,
+      icon: <Zap className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />,
       tag: isEs ? "Ahorra tiempo" : "Speed Tool",
     },
   ];
@@ -123,28 +123,28 @@ export function SeoLandingContent({
       desc: isEs
         ? "Firma contratos de arrendamiento, cartas oferta o convenios de confidencialidad (NDA) sin imprimir una sola hoja de papel."
         : "Sign lease contracts, offer letters, or NDAs in seconds without printing a single sheet of paper.",
-      icon: <FileCheck2 className="h-6 w-6 text-indigo-400" />,
+      icon: <FileCheck2 className="h-6 w-6 text-indigo-500 dark:text-indigo-400" />,
     },
     {
       title: isEs ? "Trámites de Gobierno y Formatos Oficiales" : "Government & Official Forms",
       desc: isEs
         ? "Rellena formularios del SAT, IMSS, visas, pasaportes y solicitudes gubernamentales que vienen en formato PDF plano no editable."
         : "Fill out tax forms, visa applications, and official government paperwork that come in flat, non-editable formats.",
-      icon: <FileSpreadsheet className="h-6 w-6 text-emerald-400" />,
+      icon: <FileSpreadsheet className="h-6 w-6 text-emerald-500 dark:text-emerald-400" />,
     },
     {
       title: isEs ? "Facturas, Presupuestos y Recibos" : "Invoices & Receipts",
       desc: isEs
         ? "Corrige fechas incorrectas, añade sellos de pagado, ajusta descripciones o tapa números viejos con el corrector blanco."
         : "Fix typos in invoices, add paid stamps, adjust descriptions, or whiteout old prices before sending.",
-      icon: <Edit3 className="h-6 w-6 text-amber-400" />,
+      icon: <Edit3 className="h-6 w-6 text-amber-500 dark:text-amber-400" />,
     },
     {
       title: isEs ? "Tareas Escolares y Universidad" : "Academic & School Work",
       desc: isEs
         ? "Contesta cuestionarios, llena fichas de inscripción, resalta lecturas clave y firma autorizaciones escolares desde tu celular o laptop."
         : "Answer worksheets, fill enrollment forms, highlight key study passages, and sign school permissions on phone or laptop.",
-      icon: <Sparkles className="h-6 w-6 text-violet-400" />,
+      icon: <Sparkles className="h-6 w-6 text-violet-500 dark:text-violet-400" />,
     },
   ];
 
@@ -200,18 +200,18 @@ export function SeoLandingContent({
   ];
 
   return (
-    <div className="border-t border-slate-900 bg-slate-950">
+    <div className="border-t border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
       {/* Step-by-Step Guide Section */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8 border-b border-slate-900/80">
+      <section className="px-4 py-20 sm:px-6 lg:px-8 border-b border-slate-200/80 dark:border-slate-900/80">
         <div className="mx-auto max-w-5xl space-y-12">
           <div className="text-center space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               {isEs ? "Guía Rápida" : "Quick Walkthrough"}
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isEs ? "¿Cómo modificar un PDF en línea gratis?" : "How to edit a PDF online for free?"}
             </h2>
-            <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
               {isEs
                 ? "Sin descargar programas pesados ni registrar tarjetas. Rellena, edita y firma en menos de 60 segundos."
                 : "No complex software or credit card required. Fill, edit, and sign any document in under 60 seconds."}
@@ -222,16 +222,16 @@ export function SeoLandingContent({
             {steps.map((st) => (
               <div
                 key={st.num}
-                className="relative rounded-2xl border border-slate-800 bg-slate-900/60 p-6 space-y-4 hover:border-slate-700 transition"
+                className="relative rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 p-6 space-y-4 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm transition"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-800/80 border border-slate-700">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm">
                     {st.icon}
                   </div>
-                  <span className="text-2xl font-black text-slate-700">{st.num}</span>
+                  <span className="text-2xl font-black text-slate-300 dark:text-slate-700">{st.num}</span>
                 </div>
-                <h3 className="text-lg font-bold text-white">{st.title}</h3>
-                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{st.desc}</p>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">{st.title}</h3>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{st.desc}</p>
               </div>
             ))}
           </div>
@@ -248,9 +248,9 @@ export function SeoLandingContent({
             <button
               type="button"
               onClick={onTrySample}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 transition"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition shadow-sm"
             >
-              <Sparkles className="h-4 w-4 text-emerald-400" />
+              <Sparkles className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
               {isEs ? "Probar documento demo" : "Try sample demo"}
             </button>
           </div>
@@ -258,18 +258,18 @@ export function SeoLandingContent({
       </section>
 
       {/* Deep Feature Grid Section */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8 border-b border-slate-900/80 bg-slate-950/70">
+      <section className="px-4 py-20 sm:px-6 lg:px-8 border-b border-slate-200/80 dark:border-slate-900/80 bg-slate-50/50 dark:bg-slate-950/70">
         <div className="mx-auto max-w-5xl space-y-12">
           <div className="text-center space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               {isEs ? "Herramientas de Estudio" : "Studio Capabilities"}
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isEs
                 ? "Todo lo que necesitas para modificar cualquier PDF"
                 : "Everything you need to edit and customize any PDF"}
             </h2>
-            <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
               {isEs
                 ? "Diseñado tanto para usuarios ocasionales que solo necesitan firmar una hoja, como para profesionales que gestionan cientos de documentos."
                 : "Engineered for anyone needing to sign a quick form or professionals managing dozens of contracts."}
@@ -280,18 +280,18 @@ export function SeoLandingContent({
             {toolsDetail.map((t) => (
               <div
                 key={t.title}
-                className="rounded-2xl border border-slate-800/80 bg-slate-900/40 p-6 space-y-3 hover:border-slate-700 transition"
+                className="rounded-2xl border border-slate-200 dark:border-slate-800/80 bg-white dark:bg-slate-900/40 p-6 space-y-3 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm transition"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-800 border border-slate-700/80">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80">
                     {t.icon}
                   </div>
-                  <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-[10px] font-semibold text-slate-300">
+                  <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
                     {t.tag}
                   </span>
                 </div>
-                <h3 className="text-base font-bold text-white">{t.title}</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">{t.desc}</p>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">{t.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{t.desc}</p>
               </div>
             ))}
           </div>
@@ -299,16 +299,16 @@ export function SeoLandingContent({
       </section>
 
       {/* Common Use Cases Section */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8 border-b border-slate-900/80">
+      <section className="px-4 py-20 sm:px-6 lg:px-8 border-b border-slate-200/80 dark:border-slate-900/80">
         <div className="mx-auto max-w-5xl space-y-12">
           <div className="text-center space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-violet-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">
               {isEs ? "Casos de Uso Reales" : "Common Use Cases"}
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isEs ? "¿Para qué se usa TraxPDF?" : "What do people use TraxPDF for?"}
             </h2>
-            <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
               {isEs
                 ? "Resuelve tareas cotidianas de oficina, negocios y trámites personales sin fricción."
                 : "Solve everyday business, paperwork, and personal administrative tasks effortlessly."}
@@ -319,14 +319,14 @@ export function SeoLandingContent({
             {useCases.map((uc) => (
               <div
                 key={uc.title}
-                className="flex items-start gap-4 rounded-2xl border border-slate-800/90 bg-slate-900/50 p-6"
+                className="flex items-start gap-4 rounded-2xl border border-slate-200 dark:border-slate-800/90 bg-slate-50/70 dark:bg-slate-900/50 p-6 shadow-sm"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/20">
                   {uc.icon}
                 </div>
                 <div className="space-y-1.5">
-                  <h3 className="text-base font-bold text-white">{uc.title}</h3>
-                  <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{uc.desc}</p>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">{uc.title}</h3>
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{uc.desc}</p>
                 </div>
               </div>
             ))}
@@ -335,30 +335,30 @@ export function SeoLandingContent({
       </section>
 
       {/* Privacy & Security Guarantee */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8 border-b border-slate-900/80 bg-gradient-to-b from-slate-950 via-slate-900/30 to-slate-950">
-        <div className="mx-auto max-w-4xl rounded-3xl border border-emerald-500/30 bg-emerald-950/15 p-8 sm:p-10 space-y-4 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400">
+      <section className="px-4 py-16 sm:px-6 lg:px-8 border-b border-slate-200/80 dark:border-slate-900/80 bg-gradient-to-b from-white dark:from-slate-950 via-slate-50/70 dark:via-slate-900/30 to-white dark:to-slate-950">
+        <div className="mx-auto max-w-4xl rounded-3xl border border-emerald-300 dark:border-emerald-500/30 bg-emerald-50/70 dark:bg-emerald-950/15 p-8 sm:p-10 space-y-4 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
             <Shield className="h-6 w-6" />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
             {isEs ? "Tus documentos nunca salen de tu navegador" : "Your files never leave your browser"}
           </h2>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
             {isEs
               ? "A diferencia de otros servicios en la nube que almacenan copias de tus contratos y estados de cuenta en servidores desconocidos, TraxPDF ejecuta el renderizado y la modificación del PDF 100% en tu propia computadora o teléfono móvil mediante WebAssembly y JavaScript."
               : "Unlike legacy cloud converters that store copies of your bank statements and legal contracts on unknown servers, TraxPDF renders and edits PDFs 100% inside your local device memory using WebAssembly and client-side JavaScript."}
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-5 pt-2 text-xs text-emerald-300/90 font-medium">
+          <div className="flex flex-wrap items-center justify-center gap-5 pt-2 text-xs text-emerald-800 dark:text-emerald-300/90 font-medium">
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               {isEs ? "Cero subidas a servidores en modo gratis" : "Zero server uploads in free mode"}
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               {isEs ? "Cumple con privacidad GDPR y confidencialidad" : "GDPR & privacy friendly"}
             </span>
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               {isEs ? "Sin marcas de agua forzadas" : "No forced watermarks"}
             </span>
           </div>
@@ -366,16 +366,16 @@ export function SeoLandingContent({
       </section>
 
       {/* FAQ Accordion Section (Indexed by Google for Rich Snippets) */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8 border-b border-slate-900/80">
+      <section className="px-4 py-20 sm:px-6 lg:px-8 border-b border-slate-200/80 dark:border-slate-900/80">
         <div className="mx-auto max-w-3xl space-y-10">
           <div className="text-center space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               {isEs ? "Respuestas Rápidas" : "FAQ"}
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isEs ? "Preguntas Frecuentes sobre Modificar PDFs" : "Frequently Asked Questions"}
             </h2>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               {isEs
                 ? "Todo lo que necesitas saber sobre privacidad, formatos y límites diarios."
                 : "Everything you need to know about privacy, features, and limits."}
@@ -388,22 +388,22 @@ export function SeoLandingContent({
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-slate-800 bg-slate-900/50 overflow-hidden transition"
+                  className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/50 overflow-hidden shadow-sm transition"
                 >
                   <button
                     type="button"
                     onClick={() => toggleFaq(idx)}
-                    className="w-full flex items-center justify-between p-5 text-left text-sm sm:text-base font-semibold text-white hover:text-indigo-300 transition"
+                    className="w-full flex items-center justify-between p-5 text-left text-sm sm:text-base font-semibold text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-300 transition"
                   >
                     <span>{faq.q}</span>
                     <ChevronDown
                       className={`h-5 w-5 text-slate-400 shrink-0 transition-transform duration-200 ${
-                        isOpen ? "rotate-180 text-indigo-400" : ""
+                        isOpen ? "rotate-180 text-indigo-600 dark:text-indigo-400" : ""
                       }`}
                     />
                   </button>
                   {isOpen && (
-                    <div className="px-5 pb-5 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3">
+                    <div className="px-5 pb-5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-200 dark:border-slate-800/60 pt-3">
                       {faq.a}
                     </div>
                   )}
@@ -415,12 +415,12 @@ export function SeoLandingContent({
       </section>
 
       {/* Final SEO CTA */}
-      <section className="px-4 py-20 sm:px-6 lg:px-8 text-center bg-slate-950">
+      <section className="px-4 py-20 sm:px-6 lg:px-8 text-center bg-white dark:bg-slate-950">
         <div className="mx-auto max-w-2xl space-y-6">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             {isEs ? "¿Listo para modificar tu primer PDF?" : "Ready to edit your first PDF?"}
           </h2>
-          <p className="text-sm sm:text-base text-slate-400">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
             {isEs
               ? "Prueba TraxPDF gratis ahora mismo. 100% privado, sin registro obligatorio y en segundos."
               : "Try TraxPDF free right now. 100% private, no signup required, ready in seconds."}
@@ -437,9 +437,9 @@ export function SeoLandingContent({
             <button
               type="button"
               onClick={onTrySample}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-6 py-3.5 text-sm font-semibold text-slate-200 hover:text-white hover:bg-slate-800 transition"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:text-slate-950 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition shadow-sm"
             >
-              <Sparkles className="h-4 w-4 text-emerald-400" />
+              <Sparkles className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
               {isEs ? "Ver ejemplo interactivo" : "See interactive sample"}
             </button>
           </div>
@@ -447,14 +447,14 @@ export function SeoLandingContent({
       </section>
 
       {/* Comprehensive SEO Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/90 px-4 py-12 sm:px-6 lg:px-8 text-xs text-slate-400">
+      <footer className="border-t border-slate-200 dark:border-slate-900 bg-slate-50 dark:bg-slate-950/90 px-4 py-12 sm:px-6 lg:px-8 text-xs text-slate-600 dark:text-slate-400">
         <div className="mx-auto max-w-6xl space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-3">
-              <span className="text-base font-extrabold text-white">
-                Trax<span className="text-indigo-400">PDF</span>
+              <span className="text-base font-extrabold text-slate-900 dark:text-white">
+                Trax<span className="text-indigo-600 dark:text-indigo-400">PDF</span>
               </span>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 {isEs
                   ? "Estudio PDF en línea privado y ultrarrápido para rellenar formularios, editar texto existente y firmar documentos legalmente."
                   : "Private, lightning-fast online PDF studio to fill forms, edit existing text, and sign documents legally."}
@@ -462,10 +462,10 @@ export function SeoLandingContent({
             </div>
 
             <div>
-              <p className="font-bold text-slate-200 mb-2">
+              <p className="font-bold text-slate-900 dark:text-slate-200 mb-2">
                 {isEs ? "Herramientas de Edición" : "Editing Tools"}
               </p>
-              <ul className="space-y-1.5 text-slate-400">
+              <ul className="space-y-1.5 text-slate-600 dark:text-slate-400">
                 <li>{isEs ? "Modificar texto en PDF" : "Edit PDF Text"}</li>
                 <li>{isEs ? "Rellenar formularios planos" : "Fill flat forms"}</li>
                 <li>{isEs ? "Firmar documentos PDF" : "Sign PDF documents"}</li>
@@ -476,10 +476,10 @@ export function SeoLandingContent({
             </div>
 
             <div>
-              <p className="font-bold text-slate-200 mb-2">
+              <p className="font-bold text-slate-900 dark:text-slate-200 mb-2">
                 {isEs ? "Planes y Precios" : "Pricing & Limits"}
               </p>
-              <ul className="space-y-1.5 text-slate-400">
+              <ul className="space-y-1.5 text-slate-600 dark:text-slate-400">
                 <li>{isEs ? "Invitado: 1 PDF gratis/día" : "Guest: 1 free PDF/day"}</li>
                 <li>{isEs ? "Cuenta Free: 3 PDFs gratis/día" : "Free Account: 3 free/day"}</li>
                 <li>{isEs ? "Créditos: $0.20 USD / PDF" : "Credits: $0.20 USD / PDF"}</li>
@@ -489,10 +489,10 @@ export function SeoLandingContent({
             </div>
 
             <div>
-              <p className="font-bold text-slate-200 mb-2">
+              <p className="font-bold text-slate-900 dark:text-slate-200 mb-2">
                 {isEs ? "Privacidad y Marca" : "Privacy & Brand"}
               </p>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                 {isEs
                   ? "Desarrollado con altos estándares de privacidad. Sin almacenamiento involuntario de archivos."
                   : "Built with high privacy standards. Zero unsolicited server storage."}

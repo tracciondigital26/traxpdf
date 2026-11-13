@@ -58,6 +58,16 @@ export async function getOrCreateSession(): Promise<{
 
   if (userId && db.users[userId]) {
     const user = db.users[userId];
+
+    // Check promo expiration
+    if (user.proExpiresAt && user.plan === "pro") {
+      if (Date.now() > new Date(user.proExpiresAt).getTime()) {
+        user.plan = "free";
+        user.proExpiresAt = null;
+        await writeDbAsync(db);
+      }
+    }
+
     const usedToday = user.dailyUsage[day] ?? 0;
     const dailyLimit = DAILY_LIMITS[user.plan];
     const remainingToday = dailyLimit === null ? null : Math.max(0, dailyLimit - usedToday);
@@ -78,6 +88,8 @@ export async function getOrCreateSession(): Promise<{
         cloudEnabled: user.plan === "pro_cloud",
         cloudDocCount: docs.length,
         stripeConfigured,
+        promoApplied: user.promoApplied ?? null,
+        proExpiresAt: user.proExpiresAt ?? null,
       },
     };
   }
