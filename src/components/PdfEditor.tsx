@@ -121,13 +121,9 @@ export function PdfEditor({
   const [savingCloud, setSavingCloud] = useState(false);
   const [deletedPages, setDeletedPages] = useState<number[]>([]);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
-  const [canShare, setCanShare] = useState(false);
-
-  useEffect(() => {
-    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
-      setCanShare(true);
-    }
-  }, []);
+  const [canShare] = useState<boolean>(() => {
+    return typeof navigator !== "undefined" && typeof navigator.share === "function";
+  });
 
   const [dragBox, setDragBox] = useState<{
     startX: number;
@@ -652,20 +648,23 @@ export function PdfEditor({
     setAnnotations((prev) => prev.map((a) => (a.id === selectedId ? { ...a, ...patch } : a)));
   };
 
-  const handleDeleteCurrentPage = () => {
+  const isCurrentPageDeleted = deletedPages.includes(currentPage);
+
+  const handleToggleDeleteCurrentPage = () => {
+    if (isCurrentPageDeleted) {
+      setDeletedPages((prev) => prev.filter((p) => p !== currentPage));
+      onNotify(`Página ${currentPage + 1} restaurada.`, "success");
+      return;
+    }
     const activePageCount = numPages - deletedPages.length;
     if (activePageCount <= 1) {
-      onNotify("No puedes eliminar la única página del documento.", "error");
+      onNotify("No puedes eliminar la única página activa del documento.", "error");
       return;
     }
     if (!window.confirm(`¿Eliminar la página ${currentPage + 1}? Esta página se excluirá al descargar.`)) {
       return;
     }
-    const nextDeleted = [...deletedPages, currentPage];
-    setDeletedPages(nextDeleted);
-    if (currentPage > 0) {
-      setCurrentPage((p) => Math.max(0, p - 1));
-    }
+    setDeletedPages((prev) => [...prev, currentPage]);
     onNotify(`Página ${currentPage + 1} marcada como eliminada.`, "success");
   };
 
@@ -961,12 +960,25 @@ export function PdfEditor({
           </button>
           <button
             type="button"
-            onClick={handleDeleteCurrentPage}
-            className="inline-flex items-center gap-1 rounded px-2 py-1 text-red-400 hover:bg-red-500/10 hover:text-red-300"
-            title="Eliminar esta página"
+            onClick={handleToggleDeleteCurrentPage}
+            className={`inline-flex items-center gap-1 rounded px-2 py-1 transition ${
+              isCurrentPageDeleted
+                ? "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30"
+                : "text-red-400 hover:bg-red-500/10 hover:text-red-300"
+            }`}
+            title={isCurrentPageDeleted ? "Restaurar esta página" : "Eliminar esta página"}
           >
-            <Trash2 className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Eliminar pág.</span>
+            {isCurrentPageDeleted ? (
+              <>
+                <RotateCw className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Restaurar pág.</span>
+              </>
+            ) : (
+              <>
+                <Trash2 className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Eliminar pág.</span>
+              </>
+            )}
           </button>
           <div className="h-4 w-px bg-slate-800 mx-1" />
           <button
@@ -1011,25 +1023,45 @@ export function PdfEditor({
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Left Page Strip */}
         <aside className="hidden md:flex w-28 flex-col gap-2 border-r border-slate-800 bg-slate-950/60 p-3 overflow-y-auto">
-          {Array.from({ length: numPages }).map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => setCurrentPage(idx)}
-              className={`rounded-xl border p-2.5 text-center transition ${
-                currentPage === idx
-                  ? "border-indigo-500 bg-indigo-500/15 text-white"
-                  : "border-slate-800 bg-slate-900/70 text-slate-400 hover:border-slate-700"
-              }`}
-            >
-              <div className="mx-auto mb-1.5 h-14 w-10 rounded border border-slate-700 bg-white/95 flex items-center justify-center text-[10px] font-bold text-slate-600">
-                {idx + 1}
-              </div>
-              <span className="text-[11px] font-medium">
-                {t.page} {idx + 1}
-              </span>
-            </button>
-          ))}
+          {Array.from({ length: numPages }).map((_, idx) => {
+            const isDel = deletedPages.includes(idx);
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setCurrentPage(idx)}
+                className={`relative rounded-xl border p-2.5 text-center transition ${
+                  isDel
+                    ? "border-red-900/60 bg-red-950/30 text-red-400 opacity-60"
+                    : currentPage === idx
+                      ? "border-indigo-500 bg-indigo-500/15 text-white"
+                      : "border-slate-800 bg-slate-900/70 text-slate-400 hover:border-slate-700"
+                }`}
+              >
+                {isDel && (
+                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white shadow">
+                    ✕
+                  </span>
+                )}
+                <div
+                  className={`mx-auto mb-1.5 h-14 w-10 rounded border bg-white/95 flex items-center justify-center text-[10px] font-bold ${
+                    isDel
+                      ? "border-red-500 text-red-500 line-through"
+                      : "border-slate-700 text-slate-600"
+                  }`}
+                >
+                  {idx + 1}
+                </div>
+                <span
+                  className={`text-[11px] font-medium ${
+                    isDel ? "line-through text-red-400" : ""
+                  }`}
+                >
+                  {t.page} {idx + 1}
+                </span>
+              </button>
+            );
+          })}
         </aside>
 
         {/* Center PDF Workspace */}
@@ -1050,6 +1082,21 @@ export function PdfEditor({
                 tool === "select" ? "cursor-default" : "cursor-crosshair"
               }`}
             >
+              {isCurrentPageDeleted && (
+                <div className="pointer-events-auto absolute top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-950/90 px-3.5 py-1.5 text-xs text-red-200 shadow-xl backdrop-blur-sm">
+                  <span>Página marcada para excluirse al descargar</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleDeleteCurrentPage();
+                    }}
+                    className="font-semibold underline hover:text-white"
+                  >
+                    Restaurar
+                  </button>
+                </div>
+              )}
               {/* Auto-detected AcroForm Fields */}
               {pageFields.map((field) => {
                 const val = fieldValues[field.name] ?? field.value;
@@ -1535,7 +1582,7 @@ export function PdfEditor({
             fontSize: 13,
             color: "#111827",
           };
-          setAnnotations((prev) => [...prev, newAnn]);
+          commitAnnotations((prev) => [...prev, newAnn]);
           setSelectedId(newAnn.id);
           onNotify("Dato colocado en la página.", "success");
         }}

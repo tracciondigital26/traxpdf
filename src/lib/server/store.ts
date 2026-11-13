@@ -95,11 +95,11 @@ function canUseLocalFs(): boolean {
 
 function ensureLocalDirs() {
   const { dataDir, cloudDir } = getLocalPaths();
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  if (!fs.existsSync(/*turbopackIgnore: true*/ dataDir)) {
+    fs.mkdirSync(/*turbopackIgnore: true*/ dataDir, { recursive: true });
   }
-  if (!fs.existsSync(cloudDir)) {
-    fs.mkdirSync(cloudDir, { recursive: true });
+  if (!fs.existsSync(/*turbopackIgnore: true*/ cloudDir)) {
+    fs.mkdirSync(/*turbopackIgnore: true*/ cloudDir, { recursive: true });
   }
 }
 
@@ -122,12 +122,13 @@ export async function readDbAsync(): Promise<DatabaseSchema> {
   if (canUseLocalFs()) {
     try {
       ensureLocalDirs();
-      if (!fs.existsSync(getLocalPaths().dbFile)) {
+      const dbFile = getLocalPaths().dbFile;
+      if (!fs.existsSync(/*turbopackIgnore: true*/ dbFile)) {
         const initial = emptyDb();
-        fs.writeFileSync(getLocalPaths().dbFile, JSON.stringify(initial, null, 2), "utf8");
+        fs.writeFileSync(/*turbopackIgnore: true*/ dbFile, JSON.stringify(initial, null, 2), "utf8");
         return initial;
       }
-      const raw = fs.readFileSync(getLocalPaths().dbFile, "utf8");
+      const raw = fs.readFileSync(/*turbopackIgnore: true*/ dbFile, "utf8");
       return normalizeDb(JSON.parse(raw) as Partial<DatabaseSchema>);
     } catch {
       // Fall through to memory store if FS is read-only (e.g. Workers without KV)
@@ -150,9 +151,10 @@ export async function writeDbAsync(db: DatabaseSchema): Promise<void> {
   if (canUseLocalFs()) {
     try {
       ensureLocalDirs();
-      const tmpFile = `${getLocalPaths().dbFile}.${crypto.randomBytes(4).toString("hex")}.tmp`;
-      fs.writeFileSync(tmpFile, JSON.stringify(db, null, 2), "utf8");
-      fs.renameSync(tmpFile, getLocalPaths().dbFile);
+      const dbFile = getLocalPaths().dbFile;
+      const tmpFile = `${dbFile}.${crypto.randomBytes(4).toString("hex")}.tmp`;
+      fs.writeFileSync(/*turbopackIgnore: true*/ tmpFile, JSON.stringify(db, null, 2), "utf8");
+      fs.renameSync(tmpFile, dbFile);
       return;
     } catch {
       // Fall through to memory store
@@ -186,8 +188,8 @@ export async function saveCloudPdfBytesAsync(
       const safeUser = userId.replace(/[^a-zA-Z0-9_-]/g, "");
       const safeDoc = docId.replace(/[^a-zA-Z0-9_-]/g, "");
       const dir = path.join(getLocalPaths().cloudDir, safeUser);
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, `${safeDoc}.pdf`), bytes);
+      if (!fs.existsSync(/*turbopackIgnore: true*/ dir)) fs.mkdirSync(/*turbopackIgnore: true*/ dir, { recursive: true });
+      fs.writeFileSync(/*turbopackIgnore: true*/ path.join(dir, `${safeDoc}.pdf`), bytes);
       return;
     } catch {
       // Fall through to memory
@@ -217,8 +219,8 @@ export async function readCloudPdfBytesAsync(
       const safeUser = userId.replace(/[^a-zA-Z0-9_-]/g, "");
       const safeDoc = docId.replace(/[^a-zA-Z0-9_-]/g, "");
       const filePath = path.join(getLocalPaths().cloudDir, safeUser, `${safeDoc}.pdf`);
-      if (fs.existsSync(filePath)) {
-        return new Uint8Array(fs.readFileSync(filePath));
+      if (fs.existsSync(/*turbopackIgnore: true*/ filePath)) {
+        return new Uint8Array(fs.readFileSync(/*turbopackIgnore: true*/ filePath));
       }
     } catch {
       // Fall through
