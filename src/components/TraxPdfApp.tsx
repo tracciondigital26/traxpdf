@@ -349,6 +349,15 @@ export function TraxPdfApp() {
   };
 
   const handleClaimBetaDirectly = async (code: string) => {
+    if (session?.plan === "pro" || session?.plan === "pro_cloud") {
+      notify(
+        locale === "es"
+          ? "¡Tu cuenta ya cuenta con Plan Pro Ilimitado activo!"
+          : "Your account already has Pro Unlimited active!",
+        "success",
+      );
+      return;
+    }
     try {
       const res = await authFetch("/api/promo/redeem", {
         method: "POST",
