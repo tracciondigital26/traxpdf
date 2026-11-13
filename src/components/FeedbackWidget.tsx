@@ -20,10 +20,9 @@ interface FeedbackWidgetProps {
   session: SessionInfo | null;
 }
 
-const STORAGE_KEY = "trax_feedback_widget_pos_v2";
+const STORAGE_KEY = "trax_feedback_pos_v3";
 
 export function FeedbackWidget({ session }: FeedbackWidgetProps) {
-  const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [category, setCategory] = useState<FeedbackCategory>("bug");
   const [message, setMessage] = useState("");
@@ -33,102 +32,95 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Viewport-relative coordinates (pixels from top-left)
-  const [pos, setPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  // If pos is null, the widget is naturally anchored at bottom: 20px, right: 20px via CSS
+  const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
 
+  const widgetRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
-  const startDragRef = useRef<{ clientX: number; clientY: number; posX: number; posY: number }>({
+  const hasMovedRef = useRef(false);
+  const startDragRef = useRef<{ clientX: number; clientY: number; startX: number; startY: number }>({
     clientX: 0,
     clientY: 0,
-    posX: 0,
-    posY: 0,
+    startX: 0,
+    startY: 0,
   });
-  const movedDistRef = useRef(0);
   const expandedRef = useRef(expanded);
   expandedRef.current = expanded;
 
-  // Calculate safe dimensions
-  const getWidgetDimensions = useCallback((isExp: boolean) => {
-    if (typeof window === "undefined") return { width: 170, height: 44 };
+  // Safe clamping helper
+  const clampCoordinates = useCallback((x: number, y: number, isExp: boolean) => {
+    if (typeof window === "undefined") return { x, y };
     const width = isExp ? Math.min(360, window.innerWidth - 24) : 170;
     const height = isExp ? 460 : 44;
-    return { width, height };
+    const margin = 10;
+    const maxX = Math.max(margin, window.innerWidth - width - margin);
+    const maxY = Math.max(margin, window.innerHeight - height - margin);
+    return {
+      x: Math.max(margin, Math.min(maxX, x)),
+      y: Math.max(margin, Math.min(maxY, y)),
+    };
   }, []);
 
-  // Clamp coordinates inside visible viewport with margin
-  const clampPos = useCallback(
-    (x: number, y: number, isExp: boolean) => {
-      if (typeof window === "undefined") return { x, y };
-      const margin = 12;
-      const { width, height } = getWidgetDimensions(isExp);
-      const maxX = Math.max(margin, window.innerWidth - width - margin);
-      const maxY = Math.max(margin, window.innerHeight - height - margin);
-
-      return {
-        x: Math.max(margin, Math.min(maxX, x)),
-        y: Math.max(margin, Math.min(maxY, y)),
-      };
-    },
-    [getWidgetDimensions],
-  );
-
-  // Initialize position on mount (client-only)
+  // Restore saved position on mount if valid
   useEffect(() => {
-    setMounted(true);
-    let initialX = window.innerWidth - 180;
-    let initialY = window.innerHeight - 60;
-
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved) as { x?: number; y?: number };
-        if (typeof parsed.x === "number" && typeof parsed.y === "number") {
-          initialX = parsed.x;
-          initialY = parsed.y;
+        if (
+          typeof parsed.x === "number" &&
+          typeof parsed.y === "number" &&
+          parsed.x >= 10 &&
+          parsed.x <= window.innerWidth - 120 &&
+          parsed.y >= 10 &&
+          parsed.y <= window.innerHeight - 40
+        ) {
+          setPos(clampCoordinates(parsed.x, parsed.y, false));
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
         }
       }
     } catch {
       // ignore
     }
+  }, [clampCoordinates]);
 
-    setPos(clampPos(initialX, initialY, false));
-  }, [clampPos]);
-
-  // Handle window resize or expand/collapse adjustments
+  // Adjust on window resize or expand/collapse
   useEffect(() => {
-    if (!mounted) return;
-    setPos((prev) => clampPos(prev.x, prev.y, expanded));
-
     const handleResize = () => {
-      setPos((prev) => clampPos(prev.x, prev.y, expandedRef.current));
+      setPos((prev) => {
+        if (!prev) return null;
+        return clampCoordinates(prev.x, prev.y, expandedRef.current);
+      });
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [mounted, expanded, clampPos]);
+  }, [clampCoordinates]);
 
-  // Reset to default bottom-right
-  const handleResetPosition = () => {
-    if (typeof window === "undefined") return;
-    const { width, height } = getWidgetDimensions(expanded);
-    const newPos = {
-      x: window.innerWidth - width - 16,
-      y: window.innerHeight - height - 16,
-    };
-    setPos(newPos);
+  // When expanding, ensure the larger card fits on screen
+  const handleToggleExpand = (nextExpanded: boolean) => {
+    if (nextExpanded && pos) {
+      setPos((prev) => (prev ? clampCoordinates(prev.x, prev.y, true) : null));
+    }
+    setExpanded(nextExpanded);
+  };
+
+  // Reset to default bottom-right position
+  const handleResetPosition = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPos(null);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(newPos));
+      localStorage.removeItem(STORAGE_KEY);
     } catch {
       // ignore
     }
   };
 
-  // Robust window-level pointer drag
+  // Drag start handler
   const handleStartDrag = (e: React.PointerEvent) => {
-    // Only primary button
     if (e.button !== 0) return;
 
-    // Don't drag if clicking buttons or inputs inside
     const target = e.target as HTMLElement;
     if (
       target.closest("button") ||
@@ -141,27 +133,37 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
 
     e.preventDefault();
     isDraggingRef.current = true;
-    setIsDragging(true);
-    movedDistRef.current = 0;
+    hasMovedRef.current = false;
+
+    // Get current bounding rect to seamlessly start drag from wherever it currently sits
+    const rect = widgetRef.current?.getBoundingClientRect();
+    const currentX = rect ? rect.left : (pos?.x ?? Math.max(10, window.innerWidth - 180));
+    const currentY = rect ? rect.top : (pos?.y ?? Math.max(10, window.innerHeight - 60));
 
     startDragRef.current = {
       clientX: e.clientX,
       clientY: e.clientY,
-      posX: pos.x,
-      posY: pos.y,
+      startX: currentX,
+      startY: currentY,
     };
+
+    let latestClamped = { x: currentX, y: currentY };
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       if (!isDraggingRef.current) return;
       const dx = moveEvent.clientX - startDragRef.current.clientX;
       const dy = moveEvent.clientY - startDragRef.current.clientY;
-      movedDistRef.current = Math.hypot(dx, dy);
 
-      const nextX = startDragRef.current.posX + dx;
-      const nextY = startDragRef.current.posY + dy;
+      if (Math.hypot(dx, dy) > 4) {
+        hasMovedRef.current = true;
+        setIsDragging(true);
+      }
 
-      const clamped = clampPos(nextX, nextY, expandedRef.current);
-      setPos(clamped);
+      const nextX = startDragRef.current.startX + dx;
+      const nextY = startDragRef.current.startY + dy;
+
+      latestClamped = clampCoordinates(nextX, nextY, expandedRef.current);
+      setPos(latestClamped);
     };
 
     const handlePointerUp = () => {
@@ -173,15 +175,13 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
       window.removeEventListener("pointerup", handlePointerUp);
       window.removeEventListener("pointercancel", handlePointerUp);
 
-      // Save position to localStorage
-      setPos((current) => {
+      if (hasMovedRef.current) {
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(latestClamped));
         } catch {
           // ignore
         }
-        return current;
-      });
+      }
     };
 
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
@@ -190,9 +190,8 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
   };
 
   const handlePillClick = () => {
-    // If it was just a drag, don't toggle
-    if (movedDistRef.current > 6) return;
-    setExpanded(true);
+    if (hasMovedRef.current) return;
+    handleToggleExpand(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -236,27 +235,27 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
     }
   };
 
-  // If not mounted yet (SSR), render safely fixed at bottom-right
-  if (!mounted) {
-    return (
-      <div className="fixed bottom-4 right-4 z-50">
-        <div className="flex items-center gap-2 bg-rose-600 text-white px-3.5 py-2 rounded-full shadow-lg text-xs font-bold">
-          <Bug className="w-4 h-4 text-white" />
-          <span>Reportar Fallo</span>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      style={{
+  // Position style: default to rock-solid bottom: 20px, right: 20px unless dragged
+  const positionStyle: React.CSSProperties = pos
+    ? {
         position: "fixed",
         left: `${pos.x}px`,
         top: `${pos.y}px`,
-        zIndex: 9999,
+        zIndex: 99999,
         touchAction: "none",
-      }}
+      }
+    : {
+        position: "fixed",
+        bottom: "20px",
+        right: "20px",
+        zIndex: 99999,
+        touchAction: "none",
+      };
+
+  return (
+    <div
+      ref={widgetRef}
+      style={positionStyle}
       className={`select-none ${isDragging ? "cursor-grabbing" : ""}`}
     >
       {!expanded ? (
@@ -264,12 +263,12 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
         <div
           onPointerDown={handleStartDrag}
           onClick={handlePillClick}
-          className="group flex items-center gap-2 bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white px-3.5 py-2 rounded-full shadow-xl shadow-rose-950/25 cursor-grab active:cursor-grabbing border border-white/30 backdrop-blur-md transition-transform duration-100 hover:scale-105 active:scale-95"
-          title="Arrastra para mover a cualquier parte o haz clic para reportar un problema"
+          className="group flex items-center gap-2.5 bg-gradient-to-r from-rose-600 via-rose-500 to-amber-500 hover:from-rose-500 hover:to-amber-400 text-white px-4 py-2.5 rounded-full shadow-2xl shadow-rose-950/40 cursor-grab active:cursor-grabbing border-2 border-white/40 backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95"
+          title="Arrastra para mover o haz clic para reportar un problema"
         >
           <GripVertical className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 shrink-0 pointer-events-none" />
           <Bug className="w-4 h-4 text-white animate-pulse shrink-0 pointer-events-none" />
-          <span className="text-xs font-bold tracking-tight whitespace-nowrap pointer-events-none">
+          <span className="text-xs font-extrabold tracking-tight whitespace-nowrap pointer-events-none shadow-sm">
             Reportar Fallo
           </span>
         </div>
@@ -280,7 +279,7 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
           <div
             onPointerDown={handleStartDrag}
             className="flex items-center justify-between px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800/90 border-b border-slate-200 dark:border-slate-800 cursor-grab active:cursor-grabbing"
-            title="Arrastra para mover esta ventana"
+            title="Arrastra desde esta barra para mover la ventana"
           >
             <div className="flex items-center gap-2 pointer-events-none">
               <GripVertical className="w-4 h-4 text-slate-400" />
@@ -291,18 +290,20 @@ export function FeedbackWidget({ session }: FeedbackWidgetProps) {
             </div>
 
             <div className="flex items-center gap-1">
+              {pos && (
+                <button
+                  type="button"
+                  onClick={handleResetPosition}
+                  className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition"
+                  title="Restablecer posición original"
+                  aria-label="Restablecer posición"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              )}
               <button
                 type="button"
-                onClick={handleResetPosition}
-                className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition"
-                title="Restablecer posición a la esquina inferior derecha"
-                aria-label="Restablecer posición"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setExpanded(false)}
+                onClick={() => handleToggleExpand(false)}
                 className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition"
                 title="Minimizar (contraer)"
                 aria-label="Contraer"
