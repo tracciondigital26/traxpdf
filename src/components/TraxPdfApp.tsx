@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import dynamic from "next/dynamic";
 import {
   CheckCircle2,
   Cloud,
@@ -23,8 +24,21 @@ import type { Locale, SessionInfo } from "@/lib/types";
 import { AuthModal } from "./AuthModal";
 import { CloudVaultModal } from "./CloudVaultModal";
 import { PaywallModal } from "./PaywallModal";
-import { PdfEditor } from "./PdfEditor";
 import { PricingModal } from "./PricingModal";
+import { SeoLandingContent } from "./SeoLandingContent";
+
+const PdfEditor = dynamic(
+  () => import("./PdfEditor").then((mod) => mod.PdfEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-64px)] bg-slate-900 text-slate-200">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+        <span className="text-xs font-medium mt-3">Cargando editor de PDF...</span>
+      </div>
+    ),
+  },
+);
 
 const LOCALE_STORAGE_KEY = "traxpdf_locale";
 const LOCALE_EVENT = "traxpdf-locale-change";
@@ -45,7 +59,7 @@ function getLocaleSnapshot(): Locale {
 }
 
 function getServerLocaleSnapshot(): Locale {
-  return "en";
+  return "es";
 }
 
 export function TraxPdfApp() {
@@ -405,6 +419,18 @@ export function TraxPdfApp() {
               </div>
             </div>
           </section>
+
+          {/* Deep SEO & Educational Content */}
+          <SeoLandingContent
+            locale={locale}
+            dict={dict}
+            onScrollToTop={() => {
+              if (typeof window !== "undefined") {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+            onTrySample={handleLoadSample}
+          />
         </main>
       )}
 
