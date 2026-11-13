@@ -34,6 +34,7 @@ import { AccountModal } from "./AccountModal";
 import { AuthModal } from "./AuthModal";
 import { BetaBanner } from "./BetaBanner";
 import { CloudVaultModal } from "./CloudVaultModal";
+import { FeedbackWidget } from "./FeedbackWidget";
 import { PaywallModal } from "./PaywallModal";
 import { PricingModal } from "./PricingModal";
 import { SeoLandingContent } from "./SeoLandingContent";
@@ -760,6 +761,8 @@ export function TraxPdfApp() {
         onOpenPricing={() => setPricingOpen(true)}
         onSessionRefresh={refreshSession}
       />
+
+      <FeedbackWidget session={session} />
     </div>
   );
 }

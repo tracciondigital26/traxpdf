@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import type { BillingCycle, CloudDocMeta, PlanTier, PurchaseRecord } from "../types";
+import type { BillingCycle, CloudDocMeta, FeedbackReport, PlanTier, PurchaseRecord } from "../types";
 
 export interface StoredUser {
   id: string;
@@ -32,6 +32,7 @@ export interface DatabaseSchema {
   usersByEmail: Record<string, string>;
   guests: Record<string, StoredGuest>;
   cloudDocs: Record<string, CloudDocMeta[]>;
+  reports?: FeedbackReport[];
 }
 
 interface TraxCloudflareEnv {
@@ -64,7 +65,7 @@ const globalForStore = globalThis as typeof globalThis & {
 };
 
 function emptyDb(): DatabaseSchema {
-  return { users: {}, usersByEmail: {}, guests: {}, cloudDocs: {} };
+  return { users: {}, usersByEmail: {}, guests: {}, cloudDocs: {}, reports: [] };
 }
 
 function normalizeDb(raw: Partial<DatabaseSchema> | null | undefined): DatabaseSchema {
@@ -73,6 +74,7 @@ function normalizeDb(raw: Partial<DatabaseSchema> | null | undefined): DatabaseS
     usersByEmail: raw?.usersByEmail ?? {},
     guests: raw?.guests ?? {},
     cloudDocs: raw?.cloudDocs ?? {},
+    reports: raw?.reports ?? [],
   };
 }
 

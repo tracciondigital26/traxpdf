@@ -15,6 +15,21 @@ export interface PurchaseRecord {
   status: "completed" | "active" | "cancelled";
 }
 
+export type FeedbackCategory = "bug" | "pdf_issue" | "suggestion" | "other";
+
+export interface FeedbackReport {
+  id: string;
+  createdAt: string;
+  userId?: string | null;
+  userEmail?: string | null;
+  userName?: string | null;
+  category: FeedbackCategory;
+  message: string;
+  status: "new" | "in_progress" | "resolved";
+  userAgent?: string;
+  url?: string;
+}
+
 export interface SessionInfo {
   authenticated: boolean;
   userId: string;
