@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { NextResponse } from "next/server";
-import { AUTH_COOKIES, createSessionToken, getOrCreateSession, hashPassword } from "@/lib/server/auth";
+import { AUTH_COOKIES, COOKIE_OPTIONS, createSessionToken, getOrCreateSession, hashPassword } from "@/lib/server/auth";
 import { readDbAsync, StoredUser, writeDbAsync } from "@/lib/server/store";
 import { evaluatePromoCode } from "@/lib/promo";
 import type { PurchaseRecord } from "@/lib/types";
@@ -86,35 +86,34 @@ export async function POST(req: Request) {
     const token = createSessionToken(newUser);
     const { session } = await getOrCreateSession();
 
+    const sessionData = {
+      ...session,
+      authenticated: true,
+      userId,
+      email,
+      name,
+      plan,
+      dailyLimit: plan === "pro" ? null : 3,
+      usedToday: 0,
+      remainingToday: plan === "pro" ? null : 3,
+      credits: 0,
+      cloudEnabled: false,
+      promoApplied,
+      proExpiresAt,
+      purchases: initialPurchases,
+      token,
+    };
+
     const res = NextResponse.json({
       ok: true,
+      token,
       promoMessage: promoApplied
         ? `¡Código ${promoApplied} aplicado con éxito! Plan Pro Ilimitado activado.`
         : null,
-      session: {
-        ...session,
-        authenticated: true,
-        userId,
-        email,
-        name,
-        plan,
-        dailyLimit: plan === "pro" ? null : 3,
-        usedToday: 0,
-        remainingToday: plan === "pro" ? null : 3,
-        credits: 0,
-        cloudEnabled: false,
-        promoApplied,
-        proExpiresAt,
-        purchases: initialPurchases,
-      },
+      session: sessionData,
     });
 
-    res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, token, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30,
-    });
+    res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, token, COOKIE_OPTIONS);
 
     return res;
   } catch {

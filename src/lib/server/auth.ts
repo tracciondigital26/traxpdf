@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { DAILY_LIMITS } from "../pricing";
 import type { BillingCycle, PlanTier, PurchaseRecord, SessionInfo } from "../types";
 import { readDbAsync, StoredUser, todayKey, writeDbAsync } from "./store";
@@ -7,6 +7,14 @@ import { getServerEnv, isStripeConfigured } from "./env";
 
 const SESSION_COOKIE = "trax_session";
 const GUEST_COOKIE = "trax_guest";
+
+export const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: 60 * 60 * 24 * 365, // 1 year
+};
 
 let cachedAuthSecret: string | null = null;
 const FALLBACK_SECRET = "traxpdf-local-dev-secret-change-in-prod";
@@ -83,6 +91,7 @@ export interface TraxUserSessionPayload {
   id: string;
   email: string;
   name: string;
+  passwordHash?: string;
   plan: Exclude<PlanTier, "guest">;
   billingCycle: BillingCycle | null;
   credits: number;
@@ -98,6 +107,7 @@ export function createSessionToken(user: StoredUser): string {
     id: user.id,
     email: user.email,
     name: user.name,
+    passwordHash: user.passwordHash || "",
     plan: user.plan,
     billingCycle: user.billingCycle,
     credits: user.credits,
@@ -136,7 +146,20 @@ export async function getOrCreateSession(): Promise<{
 }> {
   await getAuthSecret(); // ensures cachedAuthSecret is populated
   const cookieStore = await cookies();
-  const sessionToken = cookieStore.get(SESSION_COOKIE)?.value;
+  let sessionToken = cookieStore.get(SESSION_COOKIE)?.value;
+
+  if (!sessionToken) {
+    try {
+      const headerStore = await headers();
+      const authHeader = headerStore.get("authorization");
+      if (authHeader && authHeader.toLowerCase().startsWith("bearer ")) {
+        sessionToken = authHeader.slice(7).trim();
+      }
+    } catch {
+      // outside request context
+    }
+  }
+
   const rawPayload = verifySignedValue(sessionToken);
   const db = await readDbAsync();
   const day = todayKey();
@@ -157,7 +180,7 @@ export async function getOrCreateSession(): Promise<{
           id: decodedUser.id,
           email: decodedUser.email,
           name: decodedUser.name,
-          passwordHash: "",
+          passwordHash: decodedUser.passwordHash || "",
           plan: decodedUser.plan,
           billingCycle: decodedUser.billingCycle,
           credits: decodedUser.credits,
@@ -171,6 +194,8 @@ export async function getOrCreateSession(): Promise<{
         };
         db.usersByEmail[decodedUser.email.toLowerCase()] = activeUserId;
         await writeDbAsync(db);
+      } else if (!db.users[activeUserId].passwordHash && decodedUser.passwordHash) {
+        db.users[activeUserId].passwordHash = decodedUser.passwordHash;
       }
     } else {
       activeUserId = rawPayload;
@@ -224,6 +249,7 @@ export async function getOrCreateSession(): Promise<{
     const dailyLimit = DAILY_LIMITS[user.plan];
     const remainingToday = dailyLimit === null ? null : Math.max(0, dailyLimit - usedToday);
     const docs = db.cloudDocs[user.id] ?? [];
+    const activeToken = createSessionToken(user);
 
     return {
       session: {
@@ -244,8 +270,9 @@ export async function getOrCreateSession(): Promise<{
         promoApplied: user.promoApplied ?? null,
         proExpiresAt: user.proExpiresAt ?? null,
         purchases: user.purchases || [],
+        token: activeToken,
       },
-      setSessionCookie,
+      setSessionCookie: setSessionCookie || activeToken,
     };
   }
 

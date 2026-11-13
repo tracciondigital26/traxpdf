@@ -23,6 +23,13 @@ import {
 import { detectLocale, dictionaries } from "@/lib/i18n";
 import { generateSamplePdf } from "@/lib/pdf/samplePdf";
 import type { Locale, SessionInfo } from "@/lib/types";
+import {
+  AUTH_EVENT,
+  authFetch,
+  clearAuthSession,
+  getCachedSession,
+  saveAuthSession,
+} from "@/lib/clientAuth";
 import { AccountModal } from "./AccountModal";
 import { AuthModal } from "./AuthModal";
 import { CloudVaultModal } from "./CloudVaultModal";
@@ -101,7 +108,9 @@ export function TraxPdfApp() {
     getServerThemeSnapshot,
   );
 
-  const [session, setSession] = useState<SessionInfo | null>(null);
+  const [session, setSession] = useState<SessionInfo | null>(() => {
+    return getCachedSession();
+  });
 
   const [pdfBytes, setPdfBytes] = useState<Uint8Array | null>(null);
   const [pdfName, setPdfName] = useState<string>("document.pdf");
@@ -127,10 +136,15 @@ export function TraxPdfApp() {
 
   const refreshSession = useCallback(async () => {
     try {
-      const res = await fetch("/api/session", { cache: "no-store" });
+      const res = await authFetch("/api/session", { cache: "no-store" });
       if (res.ok) {
         const data = (await res.json()) as SessionInfo;
         setSession(data);
+        if (data.authenticated) {
+          saveAuthSession(data, data.token);
+        } else {
+          clearAuthSession();
+        }
       }
     } catch {
       // ignore
@@ -141,18 +155,39 @@ export function TraxPdfApp() {
     let cancelled = false;
     async function init() {
       try {
-        const res = await fetch("/api/session", { cache: "no-store" });
+        const res = await authFetch("/api/session", { cache: "no-store" });
         if (!cancelled && res.ok) {
           const data = (await res.json()) as SessionInfo;
           setSession(data);
+          if (data.authenticated) {
+            saveAuthSession(data, data.token);
+          } else {
+            clearAuthSession();
+          }
         }
       } catch {
         // ignore
       }
     }
     void init();
+
+    const handleSync = (e: Event) => {
+      const customEvent = e as CustomEvent<SessionInfo | null>;
+      if (customEvent.detail) {
+        setSession(customEvent.detail);
+      } else {
+        const cached = getCachedSession();
+        if (cached) setSession(cached);
+      }
+    };
+
+    window.addEventListener(AUTH_EVENT, handleSync);
+    window.addEventListener("storage", handleSync);
+
     return () => {
       cancelled = true;
+      window.removeEventListener(AUTH_EVENT, handleSync);
+      window.removeEventListener("storage", handleSync);
     };
   }, []);
 
@@ -244,8 +279,28 @@ export function TraxPdfApp() {
   };
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    await refreshSession();
+    try {
+      await authFetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // ignore
+    }
+    clearAuthSession();
+    setSession({
+      authenticated: false,
+      userId: "guest",
+      email: null,
+      name: null,
+      plan: "guest",
+      billingCycle: null,
+      dailyLimit: 1,
+      usedToday: 0,
+      remainingToday: 1,
+      credits: 0,
+      cloudEnabled: false,
+      cloudDocCount: 0,
+      stripeConfigured: session?.stripeConfigured ?? false,
+      purchases: [],
+    });
   };
 
   const renderPlanBadge = () => {

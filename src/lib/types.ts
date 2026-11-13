@@ -33,6 +33,7 @@ export interface SessionInfo {
   promoApplied?: string | null;
   proExpiresAt?: string | null; // ISO date if limited promo, null if lifetime/paid
   purchases?: PurchaseRecord[];
+  token?: string;
 }
 
 export interface CloudDocMeta {

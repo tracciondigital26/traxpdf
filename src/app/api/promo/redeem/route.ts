@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AUTH_COOKIES, createSessionToken, getOrCreateSession } from "@/lib/server/auth";
+import { AUTH_COOKIES, COOKIE_OPTIONS, createSessionToken, getOrCreateSession } from "@/lib/server/auth";
 import { readDbAsync, writeDbAsync } from "@/lib/server/store";
 import { evaluatePromoCode } from "@/lib/promo";
 import type { PurchaseRecord } from "@/lib/types";
@@ -51,18 +51,18 @@ export async function POST(req: Request) {
 
     const { session: updatedSession } = await getOrCreateSession();
 
+    const token = createSessionToken(user);
     const res = NextResponse.json({
       ok: true,
+      token,
       message: `¡Código ${evaluation.promo.code} aplicado con éxito! Has activado ${evaluation.promo.title}.`,
-      session: updatedSession,
+      session: {
+        ...updatedSession,
+        token,
+      },
     });
 
-    res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, createSessionToken(user), {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30,
-    });
+    res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, token, COOKIE_OPTIONS);
 
     return res;
   } catch {

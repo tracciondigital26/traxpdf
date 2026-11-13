@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { DAILY_LIMITS } from "@/lib/pricing";
-import { AUTH_COOKIES, getOrCreateSession } from "@/lib/server/auth";
+import { AUTH_COOKIES, COOKIE_OPTIONS, createSessionToken, getOrCreateSession } from "@/lib/server/auth";
 import { readDbAsync, todayKey, writeDbAsync } from "@/lib/server/store";
 
 export async function POST() {
@@ -60,13 +60,17 @@ export async function POST() {
       user.credits -= 1;
       user.dailyUsage[day] = usedToday + 1;
       await writeDbAsync(db);
-      return NextResponse.json({
+      const token = createSessionToken(user);
+      const res = NextResponse.json({
         allowed: true,
         source: "credit",
         usedToday: user.dailyUsage[day],
         remainingToday: 0,
         credits: user.credits,
+        token,
       });
+      res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, token, COOKIE_OPTIONS);
+      return res;
     }
 
     return NextResponse.json(

@@ -38,6 +38,7 @@ import type {
 } from "@/lib/types";
 import { SignatureModal } from "./SignatureModal";
 import { ProfileModal } from "./ProfileModal";
+import { authFetch } from "@/lib/clientAuth";
 
 interface PdfEditorProps {
   sourceBytes: Uint8Array;
@@ -708,7 +709,7 @@ export function PdfEditor({
     setExporting(true);
     try {
       // Check & consume daily quota or credit first
-      const quotaRes = await fetch("/api/usage/consume", { method: "POST" });
+      const quotaRes = await authFetch("/api/usage/consume", { method: "POST" });
       if (quotaRes.status === 402) {
         onOpenPaywall();
         return;
@@ -770,7 +771,7 @@ export function PdfEditor({
       fd.append("title", fileName.replace(/\.pdf$/i, ""));
       fd.append("pageCount", String(numPages));
 
-      const res = await fetch("/api/cloud/docs", { method: "POST", body: fd });
+      const res = await authFetch("/api/cloud/docs", { method: "POST", body: fd });
       if (!res.ok) {
         onNotify("Failed to save to Cloud Vault", "error");
         return;

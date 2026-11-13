@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { AUTH_COOKIES, createSessionToken, getOrCreateSession } from "@/lib/server/auth";
+import { AUTH_COOKIES, COOKIE_OPTIONS, createSessionToken, getOrCreateSession } from "@/lib/server/auth";
 import { getServerEnv } from "@/lib/server/env";
 import { readDbAsync, writeDbAsync } from "@/lib/server/store";
 import type { BillingCycle, PlanTier, PurchaseRecord } from "@/lib/types";
@@ -125,8 +125,10 @@ async function handleConfirm(sessionId: string | null) {
     await writeDbAsync(db);
   }
 
+  const token = createSessionToken(user);
   const res = NextResponse.json({
     ok: true,
+    token,
     alreadyProcessed,
     addedCredits,
     plan: user.plan,
@@ -135,12 +137,7 @@ async function handleConfirm(sessionId: string | null) {
   });
 
   // Re-issue cookie with the updated state
-  res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, createSessionToken(user), {
-    httpOnly: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  res.cookies.set(AUTH_COOKIES.SESSION_COOKIE, token, COOKIE_OPTIONS);
 
   return res;
 }

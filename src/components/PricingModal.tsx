@@ -5,6 +5,7 @@ import { Check, Cloud, Coins, CreditCard, Crown, Gift, Loader2, Sparkles, X } fr
 import type { Dictionary } from "@/lib/i18n";
 import { CREDIT_PACKS, SUBSCRIPTION_PLANS } from "@/lib/pricing";
 import type { BillingCycle, SessionInfo } from "@/lib/types";
+import { authFetch, saveAuthSession } from "@/lib/clientAuth";
 
 interface PricingModalProps {
   open: boolean;
@@ -39,7 +40,7 @@ export function PricingModal({
     setPortalBusy(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const res = await authFetch("/api/billing/portal", { method: "POST" });
       const data = (await res.json()) as { portalUrl?: string; error?: string };
       if (!res.ok || !data.portalUrl) {
         setMessage(data.error || "No se pudo abrir el portal de Stripe.");
@@ -67,7 +68,7 @@ export function PricingModal({
     setBusyKey(key);
     setMessage(null);
     try {
-      const res = await fetch("/api/billing/checkout", {
+      const res = await authFetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -76,6 +77,7 @@ export function PricingModal({
         mode?: "stripe" | "demo";
         checkoutUrl?: string;
         session?: SessionInfo;
+        token?: string;
         error?: string;
       };
       if (!res.ok) {
@@ -87,6 +89,7 @@ export function PricingModal({
         return;
       }
       if (data.session) {
+        saveAuthSession(data.session, data.token);
         onSessionUpdated(data.session);
         onClose();
       }
@@ -109,7 +112,7 @@ export function PricingModal({
     setPromoBusy(true);
     setPromoFeedback(null);
     try {
-      const res = await fetch("/api/promo/redeem", {
+      const res = await authFetch("/api/promo/redeem", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
@@ -118,14 +121,16 @@ export function PricingModal({
         error?: string;
         message?: string;
         session?: SessionInfo;
+        token?: string;
       };
       if (!res.ok || !data.session) {
-        setPromoFeedback({ msg: data.error || "Error al canjear código", tone: "error" });
+        setPromoFeedback({ tone: "error", msg: data.error || "Código no válido." });
         return;
       }
-      setPromoFeedback({ msg: data.message || "¡Código canjeado con éxito!", tone: "success" });
-      setPromoCodeInput("");
+      saveAuthSession(data.session, data.token);
       onSessionUpdated(data.session);
+      setPromoFeedback({ tone: "success", msg: data.message || "¡Código aplicado!" });
+      setPromoCodeInput("");
     } catch {
       setPromoFeedback({ msg: "Error de red al canjear", tone: "error" });
     } finally {

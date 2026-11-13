@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Loader2, X } from "lucide-react";
 import type { Dictionary } from "@/lib/i18n";
 import type { SessionInfo } from "@/lib/types";
+import { saveAuthSession } from "@/lib/clientAuth";
 
 interface AuthModalProps {
   open: boolean;
@@ -46,11 +47,12 @@ export function AuthModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = (await res.json()) as { error?: string; session?: SessionInfo };
+      const data = (await res.json()) as { error?: string; session?: SessionInfo; token?: string };
       if (!res.ok || !data.session) {
         setError(data.error || "Authentication failed");
         return;
       }
+      saveAuthSession(data.session, data.token);
       onSuccess(data.session);
       onClose();
     } catch {

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { Dictionary } from "@/lib/i18n";
 import type { SessionInfo } from "@/lib/types";
+import { authFetch } from "@/lib/clientAuth";
 
 interface AccountModalProps {
   open: boolean;
@@ -54,7 +55,7 @@ export function AccountModal({
     setPortalLoading(true);
     setPortalError(null);
     try {
-      const res = await fetch("/api/billing/portal", { method: "POST" });
+      const res = await authFetch("/api/billing/portal", { method: "POST" });
       const data = (await res.json()) as { url?: string; error?: string };
       if (res.ok && data.url) {
         window.location.href = data.url;

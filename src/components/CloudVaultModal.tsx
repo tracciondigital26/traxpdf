@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Cloud, Download, FileText, FolderOpen, Loader2, Lock, Trash2, X } from "lucide-react";
 import type { Dictionary } from "@/lib/i18n";
 import type { CloudDocMeta, SessionInfo } from "@/lib/types";
+import { authFetch } from "@/lib/clientAuth";
 
 interface CloudVaultModalProps {
   open: boolean;
@@ -34,7 +35,7 @@ export function CloudVaultModal({
       if (cancelled) return;
       setLoading(true);
       try {
-        const res = await fetch("/api/cloud/docs");
+        const res = await authFetch("/api/cloud/docs");
         if (!cancelled && res.ok) {
           const data = (await res.json()) as { docs: CloudDocMeta[] };
           setDocs(data.docs || []);
@@ -52,7 +53,7 @@ export function CloudVaultModal({
   if (!open) return null;
 
   const handleOpenInEditor = async (doc: CloudDocMeta) => {
-    const res = await fetch(`/api/cloud/docs/${doc.id}`);
+    const res = await authFetch(`/api/cloud/docs/${doc.id}`);
     if (!res.ok) return;
     const buf = await res.arrayBuffer();
     onOpenPdfBytes(new Uint8Array(buf), doc.fileName);
@@ -60,7 +61,7 @@ export function CloudVaultModal({
   };
 
   const handleDelete = async (docId: string) => {
-    const res = await fetch(`/api/cloud/docs/${docId}`, { method: "DELETE" });
+    const res = await authFetch(`/api/cloud/docs/${docId}`, { method: "DELETE" });
     if (res.ok) {
       setDocs((prev) => prev.filter((d) => d.id !== docId));
     }
