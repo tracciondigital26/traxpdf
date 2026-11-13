@@ -15,6 +15,12 @@
     "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_51Ub7xLC4xcnK7usw4ayfhPPSay5EonfXWoAf0dSxiuOqpMbIQBHorn8Vr4E7rmj59HNso2SXcCCcRl4O73inG8tT00yb7KdXSM",
     "NEXT_PUBLIC_SITE_URL": "https://traxpdf.tracciondigital.com.mx"
   },
+  "kv_namespaces": [
+    {
+      "binding": "TRAX_KV",
+      "id": "6becf41a061c4e259e715120dba65b9c"
+    }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
