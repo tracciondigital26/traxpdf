@@ -11,6 +11,10 @@
       "custom_domain": true
     }
   ],
+  "vars": {
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_51Ub7xLC4xcnK7usw4ayfhPPSay5EonfXWoAf0dSxiuOqpMbIQBHorn8Vr4E7rmj59HNso2SXcCCcRl4O73inG8tT00yb7KdXSM",
+    "NEXT_PUBLIC_SITE_URL": "https://traxpdf.tracciondigital.com.mx"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
