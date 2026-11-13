@@ -9,6 +9,7 @@ import { saveAuthSession } from "@/lib/clientAuth";
 interface AuthModalProps {
   open: boolean;
   initialMode?: "login" | "register";
+  prefillPromoCode?: string;
   dict: Dictionary;
   onClose: () => void;
   onSuccess: (session: SessionInfo) => void;
@@ -17,6 +18,7 @@ interface AuthModalProps {
 export function AuthModal({
   open,
   initialMode = "register",
+  prefillPromoCode,
   dict,
   onClose,
   onSuccess,
@@ -26,9 +28,17 @@ export function AuthModal({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [promoCode, setPromoCode] = useState("");
+  const [promoCode, setPromoCode] = useState(prefillPromoCode || "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (initialMode) setMode(initialMode);
+  }, [initialMode]);
+
+  React.useEffect(() => {
+    if (prefillPromoCode) setPromoCode(prefillPromoCode);
+  }, [prefillPromoCode]);
 
   if (!open) return null;
 

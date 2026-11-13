@@ -32,6 +32,7 @@ import {
 } from "@/lib/clientAuth";
 import { AccountModal } from "./AccountModal";
 import { AuthModal } from "./AuthModal";
+import { BetaBanner } from "./BetaBanner";
 import { CloudVaultModal } from "./CloudVaultModal";
 import { PaywallModal } from "./PaywallModal";
 import { PricingModal } from "./PricingModal";
@@ -118,6 +119,7 @@ export function TraxPdfApp() {
 
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("register");
+  const [authPromoPrefill, setAuthPromoPrefill] = useState<string>("");
   const [pricingOpen, setPricingOpen] = useState(false);
   const [paywallOpen, setPaywallOpen] = useState(false);
   const [cloudOpen, setCloudOpen] = useState(false);
@@ -346,8 +348,44 @@ export function TraxPdfApp() {
     );
   };
 
+  const handleClaimBetaDirectly = async (code: string) => {
+    try {
+      const res = await authFetch("/api/promo/redeem", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        message?: string;
+        session?: SessionInfo;
+        token?: string;
+      };
+      if (!res.ok || !data.session) {
+        notify(data.error || "No se pudo activar la promoción.", "error");
+        return;
+      }
+      saveAuthSession(data.session, data.token);
+      setSession(data.session);
+      notify(data.message || "¡Plan Pro Ilimitado activado por 30 días!", "success");
+    } catch {
+      notify("Error de red al activar promoción", "error");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+      <BetaBanner
+        dict={dict}
+        session={session}
+        onOpenRegisterWithCode={(code) => {
+          setAuthPromoPrefill(code);
+          setAuthMode("register");
+          setAuthOpen(true);
+        }}
+        onClaimCodeDirectly={handleClaimBetaDirectly}
+      />
+
       {/* Top Navbar */}
       <header className="h-16 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/90 dark:bg-slate-950/90 backdrop-blur px-4 sm:px-6 flex items-center justify-between gap-3 sticky top-0 z-40">
         <div className="flex items-center gap-3">
@@ -640,8 +678,12 @@ export function TraxPdfApp() {
       <AuthModal
         open={authOpen}
         initialMode={authMode}
+        prefillPromoCode={authPromoPrefill}
         dict={dict}
-        onClose={() => setAuthOpen(false)}
+        onClose={() => {
+          setAuthOpen(false);
+          setAuthPromoPrefill("");
+        }}
         onSuccess={(sess) => {
           setSession(sess);
           notify(

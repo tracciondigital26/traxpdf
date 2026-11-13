@@ -8,11 +8,19 @@ export interface PromoDefinition {
 }
 
 export const PROMO_DEFINITIONS: Record<string, PromoDefinition> = {
+  "TRAX-BETA": {
+    code: "TRAX-BETA",
+    aliases: ["TRAXBETA", "BETA2026", "TRAX_BETA", "BETATRAX"],
+    title: "Acceso Beta Pro (30 días)",
+    description: "30 días de acceso Pro Ilimitado durante la fase Beta.",
+    durationMonths: 1,
+    claimDeadline: "2026-12-31T23:59:59-06:00",
+  },
   TRAX3MESES: {
     code: "TRAX3MESES",
     aliases: ["PRO3MESES", "LANZAMIENTO2026", "TRAX3M"],
     title: "3 Meses Pro Gratis",
-    description: "3 meses de Pro Ilimitado sin costo. Válido para reclamar hasta el 31 de diciembre de 2026 a las 23:59.",
+    description: "3 meses de Pro Ilimitado sin costo.",
     durationMonths: 3,
     claimDeadline: "2026-12-31T23:59:59-06:00",
   },
@@ -73,7 +81,7 @@ export function evaluatePromoCode(rawCode: string | undefined | null): PromoEval
     if (Date.now() > deadlineTime) {
       return {
         valid: false,
-        error: "Esta promoción expiró el 31 de diciembre de 2026 a las 11:59 PM.",
+        error: "Esta promoción ya no se encuentra disponible.",
       };
     }
   }
