@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { DAILY_LIMITS } from "../pricing";
 import type { SessionInfo } from "../types";
 import { readDbAsync, todayKey, writeDbAsync } from "./store";
+import { isStripeConfigured } from "./env";
 
 const SESSION_COOKIE = "trax_session";
 const GUEST_COOKIE = "trax_guest";
@@ -54,7 +55,7 @@ export async function getOrCreateSession(): Promise<{
   const userId = verifySignedValue(sessionToken);
   const db = await readDbAsync();
   const day = todayKey();
-  const stripeConfigured = Boolean(process.env.STRIPE_SECRET_KEY);
+  const stripeConfigured = await isStripeConfigured();
 
   if (userId && db.users[userId]) {
     const user = db.users[userId];

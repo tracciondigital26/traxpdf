@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { CREDIT_PACKS, getPlanPriceCents, SUBSCRIPTION_PLANS } from "@/lib/pricing";
 import { getOrCreateSession } from "@/lib/server/auth";
+import { getServerEnv } from "@/lib/server/env";
 import { readDbAsync, writeDbAsync } from "@/lib/server/store";
 import { createStripeCheckoutSession } from "@/lib/server/stripe";
 import type { BillingCycle } from "@/lib/types";
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
   }
 
   const body = (await req.json()) as CheckoutBody;
-  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  const stripeKey = await getServerEnv("STRIPE_SECRET_KEY");
 
   // Validate payload
   let lineTitle = "";

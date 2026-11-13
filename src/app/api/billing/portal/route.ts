@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getOrCreateSession } from "@/lib/server/auth";
+import { getServerEnv } from "@/lib/server/env";
 import { readDbAsync } from "@/lib/server/store";
 import { createStripePortalSession } from "@/lib/server/stripe";
 
@@ -9,7 +10,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Please sign in to access the billing portal." }, { status: 401 });
   }
 
-  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  const stripeKey = await getServerEnv("STRIPE_SECRET_KEY");
   if (!stripeKey) {
     return NextResponse.json({ error: "Stripe is not configured on this environment." }, { status: 400 });
   }

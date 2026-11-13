@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getServerEnv } from "@/lib/server/env";
 import { readDbAsync, writeDbAsync } from "@/lib/server/store";
 import { verifyStripeWebhookSignature } from "@/lib/server/stripe";
 import type { BillingCycle, PlanTier } from "@/lib/types";
@@ -12,7 +13,7 @@ interface StripeEvent {
 }
 
 export async function POST(req: Request) {
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  const webhookSecret = await getServerEnv("STRIPE_WEBHOOK_SECRET");
   const rawBody = await req.text();
   const signature = req.headers.get("stripe-signature");
 
