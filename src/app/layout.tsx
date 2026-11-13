@@ -10,7 +10,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://traxpdf.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://traxpdf.tracciondigital.com.mx"),
   title: {
     default: "TraxPDF — Modificar PDF en Línea Gratis, Rellenar y Firmar Formularios",
     template: "%s | TraxPDF",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     title: "Modificar PDF en Línea Gratis — TraxPDF Studio",
     description:
       "Edita texto existente, rellena formularios planos, firma y corrige documentos PDF directamente en tu navegador sin instalar programas y con privacidad total.",
-    url: "https://traxpdf.com",
+    url: "https://traxpdf.tracciondigital.com.mx",
     siteName: "TraxPDF",
     locale: "es_MX",
     alternateLocale: ["es_ES", "en_US"],

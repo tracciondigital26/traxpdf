@@ -6,9 +6,9 @@ export function SeoStructuredData() {
     "@graph": [
       {
         "@type": "WebApplication",
-        "@id": "https://traxpdf.com/#webapp",
+        "@id": "https://traxpdf.tracciondigital.com.mx/#webapp",
         "name": "TraxPDF",
-        "url": "https://traxpdf.com",
+        "url": "https://traxpdf.tracciondigital.com.mx",
         "applicationCategory": "BusinessApplication",
         "operatingSystem": "All",
         "browserRequirements": "Requires JavaScript. Requires HTML5.",
@@ -40,7 +40,7 @@ export function SeoStructuredData() {
       },
       {
         "@type": "HowTo",
-        "@id": "https://traxpdf.com/#howto",
+        "@id": "https://traxpdf.tracciondigital.com.mx/#howto",
         "name": "Cómo modificar un documento PDF en línea gratis",
         "description": "Aprende a editar texto, rellenar formularios o firmar un PDF en segundos sin instalar programas.",
         "totalTime": "PT1M",
@@ -67,7 +67,7 @@ export function SeoStructuredData() {
       },
       {
         "@type": "FAQPage",
-        "@id": "https://traxpdf.com/#faq",
+        "@id": "https://traxpdf.tracciondigital.com.mx/#faq",
         "mainEntity": [
           {
             "@type": "Question",
